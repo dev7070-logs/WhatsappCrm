@@ -1249,14 +1249,43 @@ export async function downloadMedia(
   args: DownloadMediaArgs
 ): Promise<{ buffer: Buffer; contentType: string }> {
   const { downloadUrl, accessToken } = args
+  // We attach the WABA access token to this request, so only ever send
+  // it to Meta's own media hosts over HTTPS — never to an arbitrary URL.
+  if (!isMetaMediaUrl(downloadUrl)) {
+    throw new Error('Media download refused: unexpected media host')
+  }
   const response = await fetch(downloadUrl, {
     headers: { Authorization: `Bearer ${accessToken}` },
+    redirect: 'error',
   })
   if (!response.ok) {
     throw new Error(`Media download failed: ${response.status}`)
   }
+  const declared = Number(response.headers.get('content-length') ?? 0)
+  if (declared > MAX_MEDIA_DOWNLOAD_BYTES) {
+    throw new Error('Media download refused: file too large')
+  }
   const contentType =
     response.headers.get('content-type') || 'application/octet-stream'
   const buffer = Buffer.from(await response.arrayBuffer())
+  if (buffer.byteLength > MAX_MEDIA_DOWNLOAD_BYTES) {
+    throw new Error('Media download refused: file too large')
+  }
   return { buffer, contentType }
+}
+
+/** WhatsApp's own ceiling for any media type (documents) is 100 MB. */
+const MAX_MEDIA_DOWNLOAD_BYTES = 100 * 1024 * 1024
+
+const META_MEDIA_HOST_SUFFIXES = ['.fbsbx.com', '.whatsapp.net', '.fbcdn.net', '.facebook.com']
+
+export function isMetaMediaUrl(raw: string): boolean {
+  try {
+    const url = new URL(raw)
+    if (url.protocol !== 'https:') return false
+    const host = url.hostname.toLowerCase()
+    return META_MEDIA_HOST_SUFFIXES.some((suffix) => host.endsWith(suffix))
+  } catch {
+    return false
+  }
 }

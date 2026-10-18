@@ -28,14 +28,15 @@ export function ModeToggle({ className }: { className?: string }) {
       aria-label={switchLabel}
       title={switchLabel}
       className={cn(
-        "flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+        "group flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
         className,
       )}
     >
+      {/* Icon spins in on each flip — keyed so React remounts it. */}
       {mode === "dark" ? (
-        <Moon className="h-5 w-5" />
+        <Moon key="moon" className="h-5 w-5 animate-in spin-in-90 fade-in duration-300 group-hover:-rotate-12" />
       ) : (
-        <Sun className="h-5 w-5" />
+        <Sun key="sun" className="h-5 w-5 animate-in spin-in-90 fade-in duration-300 group-hover:rotate-45" />
       )}
     </button>
   );

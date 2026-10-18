@@ -34,7 +34,7 @@ import { findActiveKeyByHash, touchLastUsed } from '@/lib/api-keys/store';
 import { hashApiKey, looksLikeApiKey } from '@/lib/api-keys/keys';
 import { hasScope, type ApiScope } from '@/lib/api-keys/scopes';
 import { forbidden, rateLimited, unauthorized } from '@/lib/api/v1/respond';
-import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
+import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limit';
 
 export interface ApiKeyContext {
   /** Discriminant — lets shared logic tell key auth from cookie auth. */
@@ -81,13 +81,20 @@ export async function requireApiKey(
   request: Request,
   scope?: ApiScope
 ): Promise<ApiKeyContext> {
+  // Callers that keep presenting bad keys (scanners, guessers) get
+  // throttled per IP before we spend a DB lookup on them.
+  const failureKey = `apikey-fail:${getClientIp(request)}`;
   const presented = extractKey(request);
   if (!presented || !looksLikeApiKey(presented)) {
+    const fail = checkRateLimit(failureKey, RATE_LIMITS.apiKeyFailures);
+    if (!fail.success) throw rateLimited(fail);
     throw unauthorized();
   }
 
   const row = await findActiveKeyByHash(hashApiKey(presented));
   if (!row) {
+    const fail = checkRateLimit(failureKey, RATE_LIMITS.apiKeyFailures);
+    if (!fail.success) throw rateLimited(fail);
     // Covers unknown, revoked, and expired keys alike — we don't
     // distinguish them on the wire so a probe can't learn whether a
     // key ever existed.

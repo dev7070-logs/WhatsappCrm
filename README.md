@@ -1,184 +1,219 @@
-# wacrm — CRM Template for WhatsApp
-
-> Self-hostable CRM template for WhatsApp® — shared inbox, contacts,
-> sales pipelines, broadcasts, and no-code automations. Fork it, brand
-> it, host it.
+# WaFlow — Open-Source WhatsApp CRM & Automation Platform
 
 <p align="center">
-  <a href="https://www.hostinger.com/web-apps-hosting?REFERRALCODE=WACRMHOST">
-    <img src="./.github/assets/hostinger-deploy.png" alt="Ship your Node.js app in one click — Deploy to Hostinger" width="900">
-  </a>
+  <img src="./public/avatars/avatar-1.webp" alt="WaFlow CRM" width="96" height="96" style="border-radius: 50%;" />
 </p>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-violet.svg)](./LICENSE)
-[![CI](https://github.com/Arjunsingh-7/wacrm/actions/workflows/ci.yml/badge.svg)](https://github.com/Arjunsingh-7/wacrm/actions/workflows/ci.yml)
-[![Next.js 16](https://img.shields.io/badge/Next.js-16-black?logo=nextdotjs)](https://nextjs.org)
-[![Supabase](https://img.shields.io/badge/Supabase-Postgres%20%2B%20Auth-3ecf8e?logo=supabase)](https://supabase.com)
-[![Stars](https://img.shields.io/github/stars/Arjunsingh-7/wacrm?style=social)](https://github.com/Arjunsingh-7/wacrm/stargazers)
+<p align="center">
+  <strong>The self-hostable, multi-tenant CRM for the official WhatsApp Business Cloud API.</strong><br>
+  Shared inbox, contact management, sales pipelines, broadcast campaigns, no-code visual flows, and RAG-powered AI auto-replies.
+</p>
 
-The marketing site and self-host docs live at [wacrm.tech](https://wacrm.tech).
-This repo is the product — clone or fork it to run your own CRM.
+<p align="center">
+  <!-- Tech Stack Badges / Buttons -->
+  <a href="https://nextjs.org"><img src="https://img.shields.io/badge/Next.js%2016-Turbopack-black?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js 16" /></a>
+  <a href="https://react.dev"><img src="https://img.shields.io/badge/React%2019-UI-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" /></a>
+  <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-6.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" /></a>
+  <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS v4" /></a>
+  <a href="https://supabase.com"><img src="https://img.shields.io/badge/Supabase-PostgreSQL_%2B_Auth_%2B_Storage-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" /></a>
+  <a href="https://developers.facebook.com/docs/whatsapp/cloud-api"><img src="https://img.shields.io/badge/Meta-WhatsApp_Cloud_API-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="Meta WhatsApp Cloud API" /></a>
+  <a href="https://vitest.dev"><img src="https://img.shields.io/badge/Vitest-1500%2B_Tests_Passing-6E9F18?style=for-the-badge&logo=vitest&logoColor=white" alt="Vitest Tests" /></a>
+</p>
 
-## What you get out of the box
+<p align="center">
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-purple.svg?style=flat-square" alt="License: MIT" /></a>
+  <a href="https://github.com/dev7070-logs/WhatsappCrm"><img src="https://img.shields.io/badge/GitHub-Repository-blue?style=flat-square&logo=github" alt="GitHub Repo" /></a>
+  <img src="https://img.shields.io/badge/i18n-EN_%7C_ES_%7C_PT_%7C_KO-orange?style=flat-square" alt="Multilingual" />
+  <img src="https://img.shields.io/badge/PRs-Welcome-brightgreen?style=flat-square" alt="PRs Welcome" />
+</p>
 
-- **Shared inbox** on the official WhatsApp Business API — multiple
-  agents working one number, per-conversation assignment, status, and
-  notes.
-- **Contacts + tags + custom fields**, CSV import, deduplication.
-- **Sales pipelines** (Kanban) with deals linked to conversations.
-- **Broadcasts** with Meta-approved templates, delivery + read
-  tracking, per-recipient variable substitution.
-- **No-code automations** — triggers on inbound messages, new
-  contacts, keywords, or schedule; conditional branches, waits,
-  tags, webhooks. Visual builder.
-- **AI reply assistant** — bring your own OpenAI or Anthropic key
-  (stored encrypted; no per-seat AI fee, your data stays yours).
-  One-click AI-drafted replies in the inbox, plus an optional
-  auto-reply bot with a per-conversation cap and clean human handoff.
-  Add a **knowledge base** (FAQs, policies, product docs) and it
-  answers from your own content — hybrid retrieval (Postgres full-text,
-  or semantic pgvector when an embeddings key is set).
-- **Real-time dashboard** — response times, daily volume, pipeline
-  value, cross-module activity feed.
-- **Team accounts** — invite teammates by link, role-based access
-  (owner / admin / agent / viewer), ownership transfer. Every install
-  is account-scoped, so one shared inbox can be staffed by a whole
-  team. Solo use stays single-user with zero setup.
-- **Account management** — email, password, avatar, global sign-out.
-- **Public REST API** (`/api/v1`) with scoped, revocable API keys —
-  build your own automations on top of your CRM. See
-  [docs/public-api.md](./docs/public-api.md).
-- **MCP server** — drive your CRM from Claude, Cursor, and other AI
-  assistants over the [Model Context Protocol](https://modelcontextprotocol.io).
-  Read-only by default, opt-in writes. See [docs/mcp.md](./docs/mcp.md)
-  (server in [`mcp-server/`](./mcp-server)).
+---
 
-## Why fork this?
+## 🎯 What is WaFlow?
 
-This is a **template**, not a product. Forking means you get:
+**WaFlow** is a modern, enterprise-grade WhatsApp CRM and customer communication engine designed for businesses, agencies, and dev teams. Rather than paying thousands of dollars per month for locked-in SaaS seats, WaFlow gives you **100% ownership of your code, database, and customer interactions**.
 
-- **Full ownership** — your code, your Supabase project, your domain,
-  your data. No SaaS lock-in, no seat pricing, no trust dance.
-- **Full customisation** — add the fields your team needs, remove the
-  modules you don't, redesign anything. The stack is boring on
-  purpose (Next.js + Supabase + Tailwind) so the learning curve is
-  short.
-- **Zero ops to start** — [Hostinger](https://www.hostinger.com/web-apps-hosting?REFERRALCODE=WACRMHOST)
-  Managed Node.js deploys a fork in a few clicks. No Docker, no
-  Kubernetes, no infra team needed.
-  ([See below ↓](#-deploy-on-hostinger-recommended))
-- **Real security primitives** — token encryption (AES-256-GCM), RLS
-  on every table, HMAC-verified webhooks, CSP, rate limiting, CI
-  typecheck/build on every PR.
+Powered by **Next.js 16 (App Router & Turbopack)**, **React 19**, and **Supabase (PostgreSQL with RLS)**, WaFlow connects directly to the **official Meta WhatsApp Cloud API** to offer a blazing-fast, secure, and delightful experience across desktop, tablet, and mobile.
 
-Not a framework. Not an SDK. A concrete, working CRM you can stand up
-in an afternoon and make yours.
+---
 
-## Quick start
+## 🧰 Tech Stack Breakdown
 
-```bash
-# Fork on GitHub first: https://github.com/Arjunsingh-7/wacrm → Fork
-git clone https://github.com/<your-username>/wacrm.git
-cd wacrm
-npm install
-cp .env.local.example .env.local   # fill in Supabase + Meta creds
-npm run dev
+| Technology | Purpose | Key Details |
+| :--- | :--- | :--- |
+| **Next.js 16** | Frontend & Backend Framework | App Router, Turbopack, Server Actions, Server Components, Route Handlers |
+| **React 19** | UI Library | React 19 concurrent features, client/server hooks, fast suspense boundaries |
+| **TypeScript** | Type Safety | Strict typing throughout full codebase with zero build errors |
+| **Tailwind CSS v4** | Modern Styling | CSS variable-driven themes (light/dark mode, multiple color schemes) |
+| **Supabase** | Backend as a Service | PostgreSQL DB with Row Level Security (RLS), Realtime subscriptions, Auth & Storage |
+| **Meta Cloud API** | WhatsApp Provider | Official WhatsApp Business Cloud API with HMAC-SHA256 signature verification |
+| **@xyflow/react** | Flow Canvas | Node-based interactive chatbot builder with visual branching |
+| **OpenAI / Anthropic** | AI & RAG Engine | Bring-Your-Own-Key model for AI reply suggestions and semantic auto-responses |
+| **Vitest** | Automated Testing | 138 test suites with 1,500+ unit, integration, and security tests |
+
+---
+
+## 🚀 What's Inside WaFlow?
+
+### 💬 1. Shared Team Inbox
+- **Multi-Agent Collaboration**: Multiple team members work on a single official WhatsApp Business number.
+- **Conversation Assignment**: Assign chats to specific teammates or leave them unassigned for the queue.
+- **Rich Media & Interactive Support**: Send and receive text, voice notes (Opus/OGG audio), photos, videos, PDF documents, stickers, and interactive button/list replies.
+- **Status & Internal Notes**: Categorize conversations as *Open*, *Pending*, or *Closed*, and write internal team notes hidden from the customer.
+- **Message Reactions**: Customer and agent reaction emojis synchronized in real-time.
+
+### 👥 2. Contact Management & Segmentation
+- **Smart Contact Directory**: Search by name, phone number, or email with instant autocomplete.
+- **Tagging & Custom Fields**: Assign colored labels and custom attributes (e.g. *VIP*, *Lead*, *Support Priority*).
+- **Automated Deduplication**: High-performance phone number normalization (`E.164`) prevents duplicate contacts across CSV imports and incoming chats.
+- **CSV Bulk Import & Export**: Import thousands of contacts with tag assignment in seconds.
+
+### 📊 3. Visual Sales Pipelines (Kanban)
+- **Drag-and-Drop Stages**: Move deals through custom pipeline stages (*Lead*, *Contacted*, *Demo*, *Won*, *Lost*).
+- **Direct Chat Linkage**: Open the contact's live WhatsApp conversation directly from their deal card.
+- **Multi-Currency Support**: Format deals in any currency (USD, EUR, GBP, INR, BRL, etc.) with real-time pipeline valuation.
+
+### 📢 4. Broadcast Campaigns & Analytics
+- **Official Meta Templates**: Sync and manage Meta-approved HSM message templates directly in the UI.
+- **Personalized Variables**: Automatically map contact attributes (e.g. `{{1}}` = First Name) into broadcast templates.
+- **Detailed Funnel Metrics**: Real-time counters for *Sent*, *Delivered*, *Read*, *Replied*, and *Failed* messages.
+
+### ⚡ 5. No-Code Automations
+- **Event-Driven Triggers**: Trigger actions on inbound messages, keyword matches, new contact creation, or scheduled cron jobs.
+- **Conditional Actions**: Execute logic branches (e.g. *If tag = "VIP" then assign to Senior Agent else send auto-reply*).
+- **Delayed Steps**: Add wait intervals (e.g. *Wait 2 hours, then check reply status*).
+
+### 🤖 6. Visual Flow Chatbot Builder
+- **Visual Node Canvas**: Drag-and-drop interactive chatbot creator built with `@xyflow/react`.
+- **Interactive WhatsApp Elements**: Build interactive WhatsApp button menus (up to 3 buttons) and list pickers (up to 10 options).
+- **Human Agent Handoff**: Seamlessly pause or exit automated flows when human assistance is requested.
+
+### 🧠 7. Bring-Your-Own-Key AI Assistant & Knowledge Base (RAG)
+- **Zero Markup / No Seat Fees**: Paste your own OpenAI or Anthropic API key; stored encrypted using AES-256-GCM.
+- **1-Click AI Drafts**: Generate context-aware replies directly inside the inbox composer.
+- **Autonomous Auto-Reply Bot**: Optional 24/7 auto-responder with strict anti-loop safeguards and conversation reply caps.
+- **Document Grounding (RAG)**: Upload business FAQs, pricing tables, and documentation. Uses hybrid retrieval (Postgres full-text search + optional `pgvector` semantic embeddings).
+
+### 🛡️ 8. Security & Multi-Tenant Architecture
+- **Enterprise Multi-Tenancy**: Organization workspaces with role-based access control (*Owner*, *Admin*, *Agent*, *Viewer*).
+- **Database Row Level Security (RLS)**: Enforced across all 25+ database tables—tenants and unauthorized users physically cannot query other users' data.
+- **Cryptographic Encryption**: Access tokens and webhook signing secrets encrypted with AES-256-GCM.
+- **Strict Webhook Security**: Validates HMAC-SHA256 signatures (`X-Hub-Signature-256`) on every inbound Meta webhook.
+- **Production Hardening**: Rate limiting, strict Content-Security-Policy (CSP), SSRF protection on outgoing webhooks, and brute-force protections.
+
+### 🔌 9. Public REST API & MCP Server
+- **REST API (`/api/v1`)**: Programmatically send messages, manage contacts, and read conversations with revocable, scoped API keys.
+- **Model Context Protocol (MCP)**: Native MCP server in `mcp-server/` allowing AI coding assistants (Claude Desktop, Cursor, Antigravity) to query your CRM via tool calling.
+
+---
+
+## 📁 Repository Structure
+
+```
+WaFlow/
+├── src/
+│   ├── app/                      # Next.js 16 App Router (Marketing, Auth, Dashboard, API)
+│   │   ├── (auth)/               # Login, Signup, Password Reset, Google OAuth
+│   │   ├── (dashboard)/          # Inbox, Contacts, Pipelines, Broadcasts, Automations, Flows, Settings
+│   │   ├── (marketing)/          # Responsive landing page, features, pricing
+│   │   └── api/                  # WhatsApp Webhook, Meta API, REST API v1, Cron, AI routes
+│   ├── components/               # UI components (Radix/Base-UI, Tailwind v4, Lucide icons)
+│   ├── hooks/                    # Auth, Theme, Realtime, Keyboard navigation hooks
+│   ├── lib/                      # Core business logic (WhatsApp Cloud API, Encryption, Rate-limits, AI)
+│   └── messages/                 # Multilingual translation dictionaries (en, es, pt, ko)
+├── supabase/
+│   ├── migrations/               # 55 SQL migration files (001 → 060)
+│   └── WaFlow-RUN-ALL-MIGRATIONS.sql # All migrations consolidated in single runnable file
+├── mcp-server/                   # Model Context Protocol (MCP) server integration
+├── docs/                         # Architecture, Security, API, and Deployment documentation
+└── package.json                  # Dependencies & scripts
 ```
 
-Open <http://localhost:3000>. You'll be redirected to `/login` (or
-`/dashboard` if already signed in).
+---
 
-The UI ships in English, Korean, Brazilian Portuguese and Spanish — set
-`NEXT_PUBLIC_APP_LOCALE` to `en`, `ko`, `pt` or `es` in `.env.local`
-(catalogues live in `messages/`).
+## ⚡ Quick Start & Local Setup
 
-Prefer containers? See [docs/docker.md](./docs/docker.md) for the
-Dockerfile + Docker Compose setup.
+### 1. Prerequisites
+- **Node.js** >= 22.12.0
+- **npm** >= 10.9.0
+- A free [Supabase](https://supabase.com) account (Database & Auth)
+- A [Meta for Developers](https://developers.facebook.com) account with WhatsApp Cloud API configured
 
-## 🚀 Deploy on Hostinger (recommended)
+### 2. Clone the Repository
+```bash
+git clone https://github.com/dev7070-logs/WhatsappCrm.git
+cd WhatsappCrm
+npm install
+```
 
-<p align="center">
-  <a href="https://www.hostinger.com/web-apps-hosting?REFERRALCODE=WACRMHOST">
-    <img src="./.github/assets/hostinger-deploy.png" alt="Ship your Node.js app in one click — Deploy to Hostinger" width="1000">
-  </a>
-</p>
-<p align="center">
-  <a href="https://wacrm.tech/docs/deployment-hostinger">
-    <img src="https://img.shields.io/badge/Step--by--step_guide-wacrm.tech%2Fdocs-111?style=for-the-badge" alt="Step-by-step guide" height="44">
-  </a>
-</p>
+### 3. Environment Setup
+Copy the template environment file:
+```bash
+cp .env.local.example .env.local
+```
+Fill in your credentials in `.env.local`:
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+ENCRYPTION_KEY=your-64-character-hex-encryption-key
+META_APP_SECRET=your-meta-app-secret
+META_APP_ID=your-meta-app-id
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
+*(Tip: Generate an `ENCRYPTION_KEY` via `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`)*
 
-**wacrm is built to run on [Hostinger](https://www.hostinger.com/web-apps-hosting?REFERRALCODE=WACRMHOST).**
-It's the path we test, document, and recommend — and the fastest way
-to get a production-grade CRM live without owning a VPS or a
-Kubernetes cluster.
+### 4. Database Setup
+1. Open your Supabase Project → **SQL Editor** → **New Query**.
+2. Open [`WaFlow-RUN-ALL-MIGRATIONS.sql`](./WaFlow-RUN-ALL-MIGRATIONS.sql), paste the content, and click **Run**. All 55 tables, triggers, and RLS policies will be created automatically.
 
-### Why Hostinger?
+### 5. Launch the App
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-| | |
-|---|---|
-| **One-click Git deploy** | Connect your fork, push to `main`, Hostinger builds and ships it. No SSH, no Docker, no CI to wire up — this repo's own `main` deploys this way. |
-| **Managed Node.js** | Next.js 16 (App Router, server actions, ISR) runs out of the box on [Premium, Business, and Cloud](https://www.hostinger.com/web-apps-hosting?REFERRALCODE=WACRMHOST) shared plans. You don't manage Node versions, processes, or reverse proxies. |
-| **Free SSL + free domain** | Automatic Let's Encrypt on your custom domain (or a free one included with annual plans). HTTPS is on by default — required for the WhatsApp Business webhook. |
-| **Global CDN + LiteSpeed** | Static assets cached at the edge, dynamic routes served from LiteSpeed. Snappy dashboards out of the box, no Cloudflare setup required. |
-| **Env vars + logs in hPanel** | Set `SUPABASE_*`, `WHATSAPP_*`, and `ENCRYPTION_KEY` from the panel — no `.env` on the server. Live application logs in the same UI. |
-| **DDoS protection + daily backups** | Built-in, no add-ons. The webhook endpoint is a public target — having protection at the edge matters. |
-| **Cheaper than a VPS** | Plans start at a few dollars a month — order-of-magnitude less than a comparable managed Node.js host, and you don't pay extra for the database (that's Supabase). |
-| **24/7 human support** | Live chat support in 20+ languages — useful when your CRM is the thing your team relies on to talk to customers. |
+---
 
-### The 60-second version
+## 🌐 Webhook Configuration (Local Testing)
 
-1. **Fork** this repo on GitHub.
-2. In **hPanel → Websites → Create**, pick **Node.js** and connect
-   your fork.
-3. Paste your Supabase + Meta env vars into hPanel.
-4. Push to `main`. Hostinger builds and serves it. Done.
+Meta requires an **HTTPS** callback URL to deliver incoming customer messages:
+1. Start a Cloudflare quick tunnel:
+   ```bash
+   cloudflared tunnel --url http://localhost:3000
+   ```
+2. In the WaFlow App (**Settings → WhatsApp**), save your Phone Number ID, WABA ID, Permanent Access Token, and a chosen Webhook Verify Token.
+3. In [Meta for Developers](https://developers.facebook.com) → Your App → **WhatsApp** → **Configuration**:
+   - **Callback URL:** `https://<your-tunnel-subdomain>/api/whatsapp/webhook`
+   - **Verify Token:** The exact verify token saved in Step 2.
+   - Subscribe to the **`messages`** webhook field.
 
-Full walkthrough with screenshots:
-**[wacrm.tech/docs/deployment-hostinger](https://wacrm.tech/docs/deployment-hostinger)**.
+---
 
-> _Note: wacrm is MIT-licensed and runs anywhere Node.js does
-> (Vercel, Railway, your own VPS). Hostinger is recommended, not
-> required._
+## 🧪 Testing & Code Quality
 
-## Documentation
+WaFlow maintains rigorous test coverage with over 1,500 automated tests:
+```bash
+npm run typecheck     # TypeScript compiler check
+npm run test          # Run Vitest test suite
+npm run lint          # Run ESLint rules
+npm run build         # Production Turbopack build
+```
 
-Full self-host documentation — Supabase migrations, WhatsApp Business
-API config, and production deploy — lives at
-**[wacrm.tech/docs](https://wacrm.tech/docs)**.
+---
 
-Key pages:
-- [Getting started](https://wacrm.tech/docs/getting-started)
-- [Supabase setup](https://wacrm.tech/docs/supabase-setup)
-- [WhatsApp setup](https://wacrm.tech/docs/whatsapp-setup)
-- [Environment variables](https://wacrm.tech/docs/environment-variables)
-- [Deploy on Hostinger](https://wacrm.tech/docs/deployment-hostinger)
-- [Architecture](https://wacrm.tech/docs/architecture)
-- [Troubleshooting](https://wacrm.tech/docs/troubleshooting)
-- [WhatsApp connection troubleshooting](./docs/whatsapp-connection-troubleshooting.md)
-  — what each "Save Configuration" error means, and the Meta code /
-  trace id to quote to Meta support
-- [Several WABAs on one deployment](./docs/multi-waba.md) — one Meta
-  App or several; how `META_APP_SECRET` takes a comma-separated list
-- [Auth emails](./docs/auth-emails.md) — what Supabase must allow so
-  confirmation and password-reset links come back to *your* domain
-  instead of `localhost:3000`, and how `/auth/callback` handles them
+## 🚢 Production Deployment
 
-## Stack
+WaFlow is a standard Next.js 16 application and can be deployed on:
+- **Hostinger Managed Node.js** (One-click Git deploy, free SSL, global CDN)
+- **Vercel** (`vercel deploy`)
+- **Docker / VPS** (Dockerfile and `docker-compose.yml` included in root)
+- **Railway / Render**
 
-- **App** — Next.js 16 (App Router), React 19, TypeScript, Tailwind v4.
-- **Data** — Supabase (Postgres + Auth + Storage + RLS).
-- **WhatsApp** — Meta Cloud API (official WhatsApp Business API).
+See [docs/deployment.md](./docs/deployment.md) for complete production deployment guides.
 
-## Contributing
+---
 
-This is a template, not a collaborative product — the expected flow is
-fork → customise → deploy, **not** upstream contribution. Bug reports
-and security issues are welcome; feature PRs often belong in your fork
-rather than here. Details in
-[`CONTRIBUTING.md`](./CONTRIBUTING.md) and
-[`.github/SECURITY.md`](./.github/SECURITY.md).
+## 📄 License
 
-## License
-
-[MIT](./LICENSE). Fork it, brand it, host it.
+This project is open-source and released under the [MIT License](./LICENSE). Feel free to fork it, customize it, and deploy it for your organization or clients!

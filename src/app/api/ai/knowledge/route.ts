@@ -9,6 +9,7 @@ import { loadEmbeddingsKey } from '@/lib/ai/config'
 import { ingestDocument, type IngestResult } from '@/lib/ai/knowledge'
 import { AiError } from '@/lib/ai/types'
 import { getT } from '@/lib/i18n/translate'
+import { MAX_KB_CONTENT_CHARS, MAX_KB_TITLE_CHARS } from '@/lib/api/limits'
 
 const t = getT('Api')
 
@@ -56,6 +57,14 @@ export async function POST(request: Request) {
     if (!title || !content) {
       return NextResponse.json(
         { error: t('ai.knowledge.titleContentRequired') },
+        { status: 400 },
+      )
+    }
+    // Content is chunked and every chunk embedded on the account's AI
+    // key, so an unbounded document is an unbounded bill.
+    if (title.length > MAX_KB_TITLE_CHARS || content.length > MAX_KB_CONTENT_CHARS) {
+      return NextResponse.json(
+        { error: t('ai.knowledge.docTooLarge', { max: MAX_KB_CONTENT_CHARS }) },
         { status: 400 },
       )
     }

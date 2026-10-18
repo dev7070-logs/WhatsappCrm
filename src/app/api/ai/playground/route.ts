@@ -8,6 +8,7 @@ import { buildSystemPrompt } from '@/lib/ai/defaults'
 import { latestUserMessage } from '@/lib/ai/query'
 import { AiError, type ChatMessage } from '@/lib/ai/types'
 import { getT } from '@/lib/i18n/translate'
+import { MAX_AI_MESSAGE_CHARS } from '@/lib/api/limits'
 
 const t = getT('Api')
 
@@ -52,6 +53,13 @@ export async function POST(request: Request) {
     if (messages.length === 0) {
       return NextResponse.json(
         { error: t('ai.sendMessageToTest') },
+        { status: 400 },
+      )
+    }
+    // Every character is billed on the account's own AI key.
+    if (messages.some((m) => m.content.length > MAX_AI_MESSAGE_CHARS)) {
+      return NextResponse.json(
+        { error: t('ai.messageTooLong', { max: MAX_AI_MESSAGE_CHARS }) },
         { status: 400 },
       )
     }

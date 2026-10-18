@@ -11,6 +11,7 @@ import {
   validateTriggerForActivation,
 } from '@/lib/automations/validate'
 import { getT } from '@/lib/i18n/translate'
+import { serverError } from '@/lib/api/server-error'
 
 const t = getT('Api')
 
@@ -55,7 +56,7 @@ export async function GET(
     .eq('account_id', accountId)
     .maybeSingle()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return serverError(error)
   if (!automation) return NextResponse.json({ error: t('common.notFound') }, { status: 404 })
 
   const steps = await loadStepsTree(id)
@@ -140,12 +141,12 @@ export async function PATCH(
       .update(update)
       .eq('id', id)
       .eq('account_id', accountId)
-    if (updErr) return NextResponse.json({ error: updErr.message }, { status: 500 })
+    if (updErr) return serverError(updErr)
   }
 
   if (Array.isArray(body.steps)) {
     const err = await replaceSteps(id, body.steps as BuilderStepInput[])
-    if (err) return NextResponse.json({ error: err }, { status: 500 })
+    if (err) return serverError(err)
   }
 
   return NextResponse.json({ ok: true })
@@ -173,7 +174,7 @@ export async function DELETE(
     .eq('id', id)
     .eq('account_id', accountId)
     .select('id')
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return serverError(error)
   if (!deleted || deleted.length === 0) {
     return NextResponse.json({ error: t('common.notFound') }, { status: 404 })
   }

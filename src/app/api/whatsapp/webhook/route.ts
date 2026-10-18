@@ -1,4 +1,5 @@
 import { NextResponse, after } from 'next/server'
+import { checkRateLimit, getClientIp, rateLimitResponse, RATE_LIMITS } from '@/lib/rate-limit'
 import { createClient } from '@supabase/supabase-js'
 import { decrypt, encrypt, isLegacyFormat } from '@/lib/whatsapp/encryption'
 import { getMediaUrl, downloadMedia } from '@/lib/whatsapp/meta-api'
@@ -146,6 +147,11 @@ interface WhatsAppWebhookEntry {
 
 // GET - Webhook verification
 export async function GET(request: Request) {
+  // Public and unauthenticated; each call decrypts every tenant's
+  // verify token, so cap it per IP (Meta only calls it on setup).
+  const limit = checkRateLimit(`webhook-verify:${getClientIp(request)}`, RATE_LIMITS.webhookVerify)
+  if (!limit.success) return rateLimitResponse(limit)
+
   try {
     const { searchParams } = new URL(request.url)
     const mode = searchParams.get('hub.mode')

@@ -3,6 +3,7 @@ import { getCurrentAccount, requireRole, toErrorResponse } from '@/lib/auth/acco
 import { supabaseAdmin } from '@/lib/automations/admin-client'
 import { validateInteractivePayload } from '@/lib/whatsapp/interactive'
 import { getT } from '@/lib/i18n/translate'
+import { serverError } from '@/lib/api/server-error'
 
 const t = getT('Api')
 
@@ -19,7 +20,7 @@ export async function GET() {
       .from('quick_replies')
       .select('*')
       .order('created_at', { ascending: false })
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (error) return serverError(error)
     return NextResponse.json({ quick_replies: data ?? [] })
   } catch (err) {
     return toErrorResponse(err)
@@ -77,7 +78,7 @@ export async function POST(request: Request) {
     .single()
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return serverError(error)
   }
   return NextResponse.json({ quick_reply: data }, { status: 201 })
 }

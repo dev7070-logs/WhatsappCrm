@@ -153,3 +153,26 @@ describe("getClientIp", () => {
     expect(getClientIp(req({}))).toBe("unknown");
   });
 });
+
+describe("getClientIp with TRUSTED_CLIENT_IP_HEADER", () => {
+  const req = (headers: Record<string, string>) =>
+    new Request("https://app.test/x", { headers });
+
+  it("reads only the pinned header, ignoring forged ones", () => {
+    process.env.TRUSTED_CLIENT_IP_HEADER = "cf-connecting-ip";
+    try {
+      expect(
+        getClientIp(
+          req({
+            "cf-connecting-ip": "198.51.100.9",
+            "x-real-ip": "6.6.6.6",
+            "x-forwarded-for": "7.7.7.7",
+          }),
+        ),
+      ).toBe("198.51.100.9");
+      expect(getClientIp(req({ "x-real-ip": "6.6.6.6" }))).toBe("unknown");
+    } finally {
+      delete process.env.TRUSTED_CLIENT_IP_HEADER;
+    }
+  });
+});

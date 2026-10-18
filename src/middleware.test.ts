@@ -138,3 +138,15 @@ describe("middleware — every dashboard route requires a session", () => {
     expect(new URL(res.headers.get("location")!).pathname).toBe("/login");
   });
 });
+
+describe("middleware — oversized API bodies", () => {
+  it("rejects an API request declaring more than 2 MB with 413", async () => {
+    const res = await middleware(
+      new NextRequest("https://app.test/api/quick-replies", {
+        method: "POST",
+        headers: { "content-length": String(3 * 1024 * 1024) },
+      }),
+    );
+    expect(res.status).toBe(413);
+  });
+});

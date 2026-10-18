@@ -14,7 +14,9 @@
     "noAccount": "계정이 없으신가요?",
     "createAccount": "계정 만들기",
     "linkExpired": "링크가 만료되었습니다. 비밀번호를 재설정하려면 “비밀번호를 잊으셨나요?”에서 새 링크를 요청하세요. 이메일 인증 중이었다면 다시 가입해 주세요.",
-    "linkInvalid": "이 링크로는 로그인할 수 없습니다. 이메일 인증 중이었다면 이미 인증이 완료되었을 수 있으니 아래에서 로그인하세요. 비밀번호 재설정은 새 링크를 요청한 뒤 요청한 브라우저에서 열어 주세요."
+    "linkInvalid": "이 링크로는 로그인할 수 없습니다. 이메일 인증 중이었다면 이미 인증이 완료되었을 수 있으니 아래에서 로그인하세요. 비밀번호 재설정은 새 링크를 요청한 뒤 요청한 브라우저에서 열어 주세요.",
+    "continueWithGoogle": "Google로 계속하기",
+    "orEmail": "또는 이메일로 로그인"
   },
   "Sidebar": {
     "title": "WhatsApp용 CRM 템플릿",
@@ -1667,7 +1669,7 @@
       "done": "완료",
       "dialogTitle": "팀원 초대",
       "networkError": "서버에 연결할 수 없습니다. 다시 시도할까요?",
-      "fallbackAccountName": "우리 wacrm 계정",
+      "fallbackAccountName": "우리 WaFlow 계정",
       "dialogDesc": "일회용 초대 링크를 생성합니다. WhatsApp, Slack 등 원하는 채널로 공유하세요 — 이메일 서비스가 필요하지 않습니다.",
       "roleLabel": "역할",
       "validForLabel": "링크 유효 기간",
@@ -2226,7 +2228,7 @@
   },
   "SignupPage": {
     "passwordsMismatch": "비밀번호가 일치하지 않습니다",
-    "passwordTooShort": "비밀번호는 6자 이상이어야 합니다",
+    "passwordTooShort": "비밀번호는 8자 이상이어야 합니다",
     "checkEmailTitle": "이메일을 확인하세요",
     "checkEmailDesc": "<strong>{email}</strong>로 확인 링크를 보냈습니다. 받은 편지함에서 링크를 클릭해 계정을 인증하세요.",
     "backToSignIn": "로그인으로 돌아가기",
@@ -2239,17 +2241,24 @@
     "emailLabel": "이메일",
     "emailPlaceholder": "you@example.com",
     "passwordLabel": "비밀번호",
-    "passwordPlaceholder": "6자 이상",
+    "passwordPlaceholder": "8자 이상",
     "confirmPasswordLabel": "비밀번호 확인",
     "confirmPasswordPlaceholder": "비밀번호를 다시 입력하세요",
     "creating": "계정 만드는 중...",
     "submit": "계정 만들기",
     "haveAccount": "이미 계정이 있으신가요?",
-    "signIn": "로그인"
+    "signIn": "로그인",
+    "signUpWithGoogle": "Google로 가입하기",
+    "orEmail": "또는 이메일로 가입",
+    "strengthWeak": "약함",
+    "strengthFair": "보통",
+    "strengthGood": "좋음",
+    "strengthStrong": "강함",
+    "terms": "계정을 만들면 이용약관 및 개인정보 처리방침에 동의하게 됩니다."
   },
   "ForgotPasswordPage": {
     "checkEmailTitle": "이메일을 확인하세요",
-    "checkEmailDesc": "<strong>{email}</strong>로 비밀번호 재설정 링크를 보냈습니다. 받은 편지함을 확인하세요.",
+    "checkEmailDesc": "<strong>{email}</strong> 계정이 있다면 비밀번호 재설정 링크를 보냈습니다. 받은편지함을 확인하세요.",
     "backToSignIn": "로그인으로 돌아가기",
     "title": "비밀번호 재설정",
     "desc": "이메일을 입력하시면 재설정 링크를 보내드립니다",
@@ -2262,13 +2271,13 @@
     "title": "새 비밀번호 설정",
     "desc": "계정의 새 비밀번호를 입력하세요.",
     "passwordLabel": "새 비밀번호",
-    "passwordPlaceholder": "6자 이상",
+    "passwordPlaceholder": "8자 이상",
     "confirmPasswordLabel": "새 비밀번호 확인",
     "confirmPasswordPlaceholder": "새 비밀번호를 다시 입력하세요",
     "submit": "비밀번호 변경",
     "saving": "변경 중...",
     "passwordsMismatch": "비밀번호가 일치하지 않습니다",
-    "passwordTooShort": "비밀번호는 6자 이상이어야 합니다",
+    "passwordTooShort": "비밀번호는 8자 이상이어야 합니다",
     "checking": "링크를 확인하는 중...",
     "expiredTitle": "이 링크는 더 이상 유효하지 않습니다",
     "expiredDesc": "비밀번호 재설정 링크는 한 번만 사용할 수 있으며 잠시 후 만료됩니다. 새 링크를 요청한 뒤 요청한 브라우저에서 열어 주세요.",
@@ -2405,7 +2414,7 @@
     }
   },
   "Metadata": {
-    "description": "직접 호스팅할 수 있는 WhatsApp용 CRM 템플릿입니다."
+    "description": "WaFlow — 영업 및 지원 팀을 위한 WhatsApp CRM."
   },
   "Currency": {
     "USD": "미국 달러",
@@ -2825,8 +2834,10 @@
         "saveDocFailed": "문서를 저장하지 못했습니다",
         "savedIndexFailed": "저장되었지만 의미 기반 색인에 실패했습니다({message}). 키워드 검색은 계속 작동합니다. 재색인을 사용해 다시 시도하세요.",
         "savedNotIndexed": "저장되었지만 색인에 실패했습니다({message}). 아직 문서를 검색할 수 없습니다. 재색인을 사용해 다시 시도하세요.",
-        "savedKeywordOnly": "키워드 검색만으로 저장되었습니다 — 임베딩 키를 복호화할 수 없습니다(ENCRYPTION_KEY를 확인한 후 키를 다시 입력하세요)."
-      }
+        "savedKeywordOnly": "키워드 검색만으로 저장되었습니다 — 임베딩 키를 복호화할 수 없습니다(ENCRYPTION_KEY를 확인한 후 키를 다시 입력하세요).",
+        "docTooLarge": "문서는 최대 {max}자로 제한됩니다. 큰 문서는 나눠 주세요."
+      },
+      "messageTooLong": "각 메시지는 최대 {max}자까지 가능합니다."
     },
     "automations": {
       "copyName": "{name} (복사본)",
@@ -2857,7 +2868,9 @@
       "recipientsRequired": "`recipients`(권장) 또는 `phone_numbers`를 제공하세요 — 비어 있지 않은 배열이어야 합니다",
       "templateNameRequired": "템플릿 이름은 필수입니다",
       "templateMalformed": "로컬 템플릿 데이터가 손상되었습니다 — 브로드캐스트 전에 설정에서 \"Meta에서 동기화\"를 실행해 복구하세요.",
-      "invalidPhoneFormat": "전화번호 형식이 올바르지 않습니다"
+      "invalidPhoneFormat": "전화번호 형식이 올바르지 않습니다",
+      "tooManyRecipients": "브로드캐스트는 요청당 최대 {max}명에게 보낼 수 있습니다. 더 큰 발송은 나눠 주세요.",
+      "invalidRecipients": "각 수신자에게는 전화번호와 텍스트 매개변수 목록이 필요합니다."
     },
     "whatsappConfig": {
       "fetchFailed": "설정을 가져오지 못했습니다",
@@ -2868,7 +2881,7 @@
       "wabaIdDigits": "WhatsApp Business Account ID는 숫자만 포함해야 합니다 — Meta → WhatsApp → API Setup에서 복사하세요.",
       "pinDigits": "PIN은 정확히 6자리여야 합니다.",
       "validateFailed": "설정을 검증하지 못했습니다",
-      "numberLinkedElsewhere": "이 WhatsApp 전화번호는 이미 이 인스턴스의 다른 계정에 연결되어 있습니다. 각 전화번호는 하나의 wacrm 사용자에만 연결할 수 있습니다.",
+      "numberLinkedElsewhere": "이 WhatsApp 전화번호는 이미 이 인스턴스의 다른 계정에 연결되어 있습니다. 각 전화번호는 하나의 WaFlow 사용자에만 연결할 수 있습니다.",
       "encryptFailed": "토큰을 암호화하지 못했습니다. 환경 변수의 ENCRYPTION_KEY가 유효한 64자 16진수 문자열인지 확인하세요.",
       "updateFailed": "설정을 업데이트하지 못했습니다",
       "saveFailed": "설정을 저장하지 못했습니다",
@@ -2923,5 +2936,14 @@
       "metaApiStatus": "Meta API 오류: {status}",
       "syncFailed": "템플릿을 동기화하지 못했습니다"
     }
+  },
+  "AuthErrors": {
+    "invalidCredentials": "이메일 또는 비밀번호가 올바르지 않습니다.",
+    "emailNotConfirmed": "먼저 이메일을 인증해 주세요. 받은편지함을 확인하세요.",
+    "tooManyAttempts": "시도 횟수가 너무 많습니다. 몇 분 후 다시 시도하세요.",
+    "weakPassword": "비밀번호가 너무 약합니다. 문자, 숫자, 기호를 섞어 8자 이상 사용하세요.",
+    "captchaFailed": "보안 확인을 완료한 후 다시 시도하세요.",
+    "generic": "문제가 발생했습니다. 다시 시도하세요.",
+    "googleFailed": "지금은 Google 로그인을 사용할 수 없습니다. 다시 시도하거나 이메일을 사용하세요."
   }
 }

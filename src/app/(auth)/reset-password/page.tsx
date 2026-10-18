@@ -19,41 +19,43 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { CheckCircle, KeyRound, Loader2, MailX } from "lucide-react";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { AuthShell } from "@/components/auth/auth-shell";
+import { AuthField, FormAlert, SubmitButton } from "@/components/auth/auth-field";
+import { CheckCircle, KeyRound, Loader2, Lock, MailX } from "lucide-react";
+import { useAuthErrorMessage } from "@/components/auth/use-auth-error";
+import { MIN_PASSWORD_LENGTH } from "@/lib/auth/auth-errors";
 
 type Status = "checking" | "ready" | "expired" | "done";
 
 export default function ResetPasswordPage() {
   const t = useTranslations("ResetPasswordPage");
-  const supabase = createClient();
 
-  const [status, setStatus] = useState<Status>("checking");
+  // Without Supabase keys there is no session to check — show the
+  // "expired" state (with links back) instead of hanging on "checking".
+  const [status, setStatus] = useState<Status>(() =>
+    isSupabaseConfigured() ? "checking" : "expired",
+  );
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const authMessage = useAuthErrorMessage();
 
   useEffect(() => {
     let cancelled = false;
+    if (!isSupabaseConfigured()) return;
     // The callback wrote the session cookies server-side; the browser
     // client reads them here. No user → the link didn't yield a session.
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!cancelled) setStatus(user ? "ready" : "expired");
-    });
+    createClient()
+      .auth.getUser()
+      .then(({ data: { user } }) => {
+        if (!cancelled) setStatus(user ? "ready" : "expired");
+      });
     return () => {
       cancelled = true;
     };
-  }, [supabase]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,17 +66,17 @@ export default function ResetPasswordPage() {
       return;
     }
     // Same floor as /signup.
-    if (password.length < 6) {
+    if (password.length < MIN_PASSWORD_LENGTH) {
       setError(t("passwordTooShort"));
       return;
     }
 
     setSaving(true);
-    const { error } = await supabase.auth.updateUser({ password });
+    const { error } = await createClient().auth.updateUser({ password });
     setSaving(false);
 
     if (error) {
-      setError(error.message);
+      setError(authMessage(error));
       return;
     }
     setStatus("done");
@@ -91,138 +93,92 @@ export default function ResetPasswordPage() {
     );
   }
 
+  const primaryLinkClass =
+    "flex h-12 w-full items-center justify-center rounded-full bg-primary text-[15px] font-semibold text-primary-foreground transition-all hover:bg-primary-hover hover:shadow-elev-2";
+  const outlineLinkClass =
+    "flex h-12 w-full items-center justify-center rounded-full border border-input text-[15px] font-medium text-foreground transition-all hover:bg-muted";
+
   if (status === "expired") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-4">
-        <Card className="w-full max-w-md border-border bg-card">
-          <CardHeader className="items-center text-center">
-            <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/10">
-              <MailX className="h-6 w-6 text-amber-400" />
-            </div>
-            <CardTitle className="text-xl text-foreground">
-              {t("expiredTitle")}
-            </CardTitle>
-            <CardDescription className="text-muted-foreground">
-              {t("expiredDesc")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-3">
-            <Link href="/forgot-password">
-              <Button className="h-10 w-full bg-primary text-primary-foreground hover:bg-primary/90">
-                {t("requestNewLink")}
-              </Button>
-            </Link>
-            <Link href="/login">
-              <Button
-                variant="outline"
-                className="w-full border-border text-muted-foreground hover:bg-muted hover:text-foreground"
-              >
-                {t("backToSignIn")}
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
+      <AuthShell
+        icon={<MailX className="h-6 w-6" />}
+        title={t("expiredTitle")}
+        description={t("expiredDesc")}
+      >
+        <div className="flex flex-col gap-3">
+          <Link href="/forgot-password" className={primaryLinkClass}>
+            {t("requestNewLink")}
+          </Link>
+          <Link href="/login" className={outlineLinkClass}>
+            {t("backToSignIn")}
+          </Link>
+        </div>
+      </AuthShell>
     );
   }
 
   if (status === "done") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-4">
-        <Card className="w-full max-w-md border-border bg-card">
-          <CardHeader className="items-center text-center">
-            <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-              <CheckCircle className="h-6 w-6 text-primary" />
-            </div>
-            <CardTitle className="text-xl text-foreground">
-              {t("successTitle")}
-            </CardTitle>
-            <CardDescription className="text-muted-foreground">
-              {t("successDesc")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button
-              className="h-10 w-full bg-primary text-primary-foreground hover:bg-primary/90"
-              onClick={() => {
-                // Full-page navigation, like /login: the middleware
-                // gating /dashboard must see the session cookies on a
-                // fresh top-level request, which a soft router.push
-                // can race (issue #365).
-                // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- deliberate full reload so the auth cookies reach the middleware
-                window.location.href = "/dashboard";
-              }}
-            >
-              {t("continueToDashboard")}
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+      <AuthShell
+        icon={<CheckCircle className="h-6 w-6" />}
+        title={t("successTitle")}
+        description={t("successDesc")}
+      >
+        <button
+          type="button"
+          className={primaryLinkClass}
+          onClick={() => {
+            // Full-page navigation, like /login: the middleware
+            // gating /dashboard must see the session cookies on a
+            // fresh top-level request, which a soft router.push
+            // can race (issue #365).
+            // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- deliberate full reload so the auth cookies reach the middleware
+            window.location.href = "/dashboard";
+          }}
+        >
+          {t("continueToDashboard")}
+        </button>
+      </AuthShell>
     );
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md border-border bg-card">
-        <CardHeader className="items-center text-center">
-          <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-            <KeyRound className="h-6 w-6 text-primary" />
-          </div>
-          <CardTitle className="text-xl text-foreground">{t("title")}</CardTitle>
-          <CardDescription className="text-muted-foreground">
-            {t("desc")}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            {error && (
-              <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-                {error}
-              </div>
-            )}
+    <AuthShell
+      icon={<KeyRound className="h-6 w-6" />}
+      title={t("title")}
+      description={t("desc")}
+    >
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        {error && <FormAlert tone="error">{error}</FormAlert>}
 
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="password" className="text-muted-foreground">
-                {t("passwordLabel")}
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="new-password"
-                placeholder={t("passwordPlaceholder")}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="border-border bg-muted text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
-              />
-            </div>
+        <AuthField
+          id="password"
+          type="password"
+          icon={Lock}
+          autoComplete="new-password"
+          label={t("passwordLabel")}
+          placeholder={t("passwordPlaceholder")}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
 
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="confirmPassword" className="text-muted-foreground">
-                {t("confirmPasswordLabel")}
-              </Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                placeholder={t("confirmPasswordPlaceholder")}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                className="border-border bg-muted text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
-              />
-            </div>
+        <AuthField
+          id="confirmPassword"
+          type="password"
+          icon={Lock}
+          autoComplete="new-password"
+          label={t("confirmPasswordLabel")}
+          placeholder={t("confirmPasswordPlaceholder")}
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          required
+        />
 
-            <Button
-              type="submit"
-              disabled={saving}
-              className="mt-2 h-10 w-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-            >
-              {saving ? t("saving") : t("submit")}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+        <SubmitButton loading={saving} loadingLabel={t("saving")}>
+          {t("submit")}
+        </SubmitButton>
+      </form>
+    </AuthShell>
   );
 }

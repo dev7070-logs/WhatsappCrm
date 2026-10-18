@@ -1,7 +1,44 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { isSupabaseConfigured } from '@/lib/supabase/config'
+import { isDemoPreview } from '@/lib/demo'
+
+// Every top-level route under src/app/(dashboard)/ belongs here —
+// middleware.test.ts reads that directory and fails on a missing one.
+const protectedPaths = ['/dashboard', '/inbox', '/contacts', '/pipelines', '/broadcasts', '/automations', '/flows', '/agents', '/notifications', '/settings']
+
+// Largest JSON body any API route legitimately needs (a 1 000-recipient
+// broadcast or a 200 000-character knowledge document fits well
+// inside). The WhatsApp webhook enforces its own 4 MB cap on the raw
+// body, so it is skipped here.
+const MAX_API_BODY_BYTES = 2 * 1024 * 1024
 
 export async function middleware(request: NextRequest) {
+  // Refuse oversized API payloads up front, before any route parses
+  // them. (Bodies without a Content-Length are left to the routes.)
+  const { pathname } = request.nextUrl
+  if (pathname.startsWith('/api/') && !pathname.startsWith('/api/whatsapp/webhook')) {
+    const declared = Number(request.headers.get('content-length') ?? 0)
+    if (declared > MAX_API_BODY_BYTES) {
+      return NextResponse.json({ error: 'Request body too large' }, { status: 413 })
+    }
+  }
+  // Fresh clone without Supabase keys: let the public site and auth
+  // pages render (they show a setup notice) instead of throwing on
+  // every request. The app itself still needs a session, so send
+  // protected routes to /login.
+  if (!isSupabaseConfigured()) {
+    // Dev-only demo preview lets the app pages render (see lib/demo.ts).
+    if (isDemoPreview()) return NextResponse.next({ request })
+    if (protectedPaths.some(path => request.nextUrl.pathname.startsWith(path))) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      url.search = ''
+      return NextResponse.redirect(url)
+    }
+    return NextResponse.next({ request })
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -70,9 +107,6 @@ export async function middleware(request: NextRequest) {
   }
 
   // Protected pages - redirect to login if not authenticated
-  // Every top-level route under src/app/(dashboard)/ belongs here —
-  // middleware.test.ts reads that directory and fails on a missing one.
-  const protectedPaths = ['/dashboard', '/inbox', '/contacts', '/pipelines', '/broadcasts', '/automations', '/flows', '/agents', '/notifications', '/settings']
   if (!user && protectedPaths.some(path => request.nextUrl.pathname.startsWith(path))) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'

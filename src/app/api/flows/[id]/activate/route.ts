@@ -4,6 +4,7 @@ import { requireRole, toErrorResponse } from '@/lib/auth/account'
 import { supabaseAdmin } from '@/lib/flows/admin-client'
 import { validateFlowForActivation } from '@/lib/flows/validate'
 import { getT } from '@/lib/i18n/translate'
+import { serverError } from '@/lib/api/server-error'
 
 const t = getT('Api')
 
@@ -31,8 +32,9 @@ export async function POST(
   // flows_update policy requires `agent`, but the service-role client
   // below bypasses RLS, so enforce the role here (a viewer passes the
   // membership-only ownership check).
+  let accountId: string
   try {
-    await requireRole('agent')
+    ;({ accountId } = await requireRole('agent'))
   } catch (err) {
     return toErrorResponse(err)
   }
@@ -113,10 +115,12 @@ export async function POST(
     .from('flows')
     .update({ status, updated_at: new Date().toISOString() })
     .eq('id', id)
+    // Service-role bypasses RLS — pin the write to the caller's account.
+    .eq('account_id', accountId)
     .select()
     .maybeSingle()
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return serverError(error)
   }
 
   if (status !== 'active') {

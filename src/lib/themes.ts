@@ -14,6 +14,7 @@
  */
 
 export const THEME_IDS = [
+  "jade",
   "violet",
   "emerald",
   "cobalt",
@@ -23,9 +24,9 @@ export const THEME_IDS = [
 
 export type ThemeId = (typeof THEME_IDS)[number];
 
-export const DEFAULT_THEME: ThemeId = "violet";
+export const DEFAULT_THEME: ThemeId = "jade";
 
-export const STORAGE_KEY = "wacrm.theme";
+export const STORAGE_KEY = "waflow.theme";
 
 /**
  * MODE — the light/dark dimension, orthogonal to the accent theme.
@@ -45,7 +46,14 @@ export type Mode = (typeof MODES)[number];
 
 export const DEFAULT_MODE: Mode = "dark";
 
-export const MODE_STORAGE_KEY = "wacrm.mode";
+/**
+ * When the visitor has never picked a mode, the boot script follows the
+ * OS `prefers-color-scheme` instead of forcing DEFAULT_MODE. DEFAULT_MODE
+ * is only the server-render / no-JS fallback.
+ */
+export const FOLLOW_SYSTEM_MODE = true;
+
+export const MODE_STORAGE_KEY = "waflow.mode";
 
 export function isMode(value: unknown): value is Mode {
   return (
@@ -68,9 +76,15 @@ export interface ThemeMeta {
 
 export const THEMES: ReadonlyArray<ThemeMeta> = [
   {
+    id: "jade",
+    name: "Jade",
+    tagline: "The default — a Material-style messaging green, tuned per mode.",
+    swatch: "oklch(0.6 0.13 168)",
+  },
+  {
     id: "violet",
     name: "Violet",
-    tagline: "The default — confident, slightly playful.",
+    tagline: "Confident, slightly playful.",
     swatch: "oklch(0.526 0.247 293)",
   },
   {

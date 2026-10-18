@@ -10,6 +10,7 @@
 
 import { requireApiKey } from '@/lib/auth/api-context';
 import { ok, okList, fail, toApiErrorResponse } from '@/lib/api/v1/respond';
+import { validateContactInput } from '@/lib/api/v1/contact-input';
 import {
   parseListParams,
   keysetFilter,
@@ -107,6 +108,8 @@ export async function POST(request: Request) {
     if (!phone) {
       return fail('bad_request', "'phone' is required", 400);
     }
+    const invalid = validateContactInput(body);
+    if (invalid) return fail('bad_request', invalid, 400);
 
     const auditUserId = await resolveAuditUserId(ctx.supabase, ctx.accountId);
 

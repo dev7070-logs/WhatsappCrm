@@ -27,6 +27,8 @@
 
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages } from 'next-intl/server';
 
 export const metadata: Metadata = {
   referrer: 'no-referrer',
@@ -35,10 +37,15 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function JoinLayout({ children }: { children: ReactNode }) {
+export default async function JoinLayout({ children }: { children: ReactNode }) {
+  // Invite pages are only reachable with a token; they get the full
+  // catalogue since they reuse settings/role strings.
+  const messages = await getMessages();
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      {children}
-    </div>
+    <NextIntlClientProvider messages={messages}>
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+        {children}
+      </div>
+    </NextIntlClientProvider>
   );
 }

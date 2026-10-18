@@ -503,7 +503,9 @@ export async function sendMessageToConversation(
     console.error('[send-message] error inserting sent message:', msgError);
     throw new SendMessageError(
       'db_error',
-      `Message sent to Meta but failed to save to DB: ${msgError.message}`,
+      // DB error text stays in the server log above — it names
+      // tables/constraints and also reaches the public /api/v1 API.
+      'Message sent to WhatsApp but could not be saved. It will not appear in the inbox.',
       500
     );
   }

@@ -10,6 +10,7 @@
 
 import { requireApiKey } from '@/lib/auth/api-context';
 import { ok, fail, toApiErrorResponse } from '@/lib/api/v1/respond';
+import { validateContactInput } from '@/lib/api/v1/contact-input';
 import {
   getContactById,
   setContactTags,
@@ -47,6 +48,9 @@ export async function PATCH(
     if (!body || typeof body !== 'object') {
       return fail('bad_request', 'Request body must be a JSON object', 400);
     }
+
+    const invalid = validateContactInput(body);
+    if (invalid) return fail('bad_request', invalid, 400);
 
     // Verify the contact is in this account before mutating anything.
     const existing = await getContactById(ctx.supabase, ctx.accountId, id);

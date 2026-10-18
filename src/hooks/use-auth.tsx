@@ -11,6 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { isDemoPreview } from "@/lib/demo";
 import type { User } from "@supabase/supabase-js";
 import { DEFAULT_CURRENCY } from "@/lib/currency";
 import {
@@ -159,11 +160,37 @@ interface ProfileRow {
  * Makes ONE getSession() call for the whole tree instead of one per
  * component, avoiding internal lock contention in the Supabase client.
  */
+// Fake owner for the dev-only demo preview (see src/lib/demo.ts).
+const DEMO = isDemoPreview();
+const DEMO_USER = {
+  id: "00000000-0000-0000-0000-000000000001",
+  email: "demo@waflow.local",
+  app_metadata: {},
+  user_metadata: { full_name: "Demo Owner" },
+  aud: "authenticated",
+  created_at: "2026-01-01T00:00:00.000Z",
+} as User;
+const DEMO_PROFILE: Profile = {
+  id: "00000000-0000-0000-0000-000000000002",
+  full_name: "Demo Owner",
+  email: "demo@waflow.local",
+  avatar_url: null,
+  role: null,
+  beta_features: [],
+  account_id: "00000000-0000-0000-0000-000000000003",
+  account_role: "owner",
+};
+const DEMO_ACCOUNT: AccountSummary = {
+  id: "00000000-0000-0000-0000-000000000003",
+  name: "Demo Owner",
+  default_currency: "INR",
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [account, setAccount] = useState<AccountSummary | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(DEMO ? DEMO_USER : null);
+  const [profile, setProfile] = useState<Profile | null>(DEMO ? DEMO_PROFILE : null);
+  const [account, setAccount] = useState<AccountSummary | null>(DEMO ? DEMO_ACCOUNT : null);
+  const [loading, setLoading] = useState(!DEMO);
   // Why the account/role couldn't be established, when it couldn't.
   // Null on the happy path.
   const [statusDetail, setStatusDetail] = useState<string | null>(null);
@@ -171,7 +198,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // local cookie read); the profile fetch crosses the network and
   // settles later. Callers that gate on `profile.*` need to know which
   // window they're in — see the type doc above.
-  const [profileLoading, setProfileLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(!DEMO);
 
   // Tracks the user ID we've successfully initiated/completed fetching
   // a profile for. This prevents redundant re-fetches and toggling
@@ -306,6 +333,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    // Demo preview: the fake session above is final; no Supabase.
+    if (DEMO) return;
     const supabase = createClient();
     let mounted = true;
 
@@ -381,6 +410,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [fetchProfile]);
 
   const signOut = useCallback(async () => {
+    if (DEMO) {
+      window.location.href = "/login";
+      return;
+    }
     const supabase = createClient();
     await supabase.auth.signOut();
     setUser(null);

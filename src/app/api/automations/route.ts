@@ -9,6 +9,7 @@ import {
   validateTriggerForActivation,
 } from '@/lib/automations/validate'
 import { getT } from '@/lib/i18n/translate'
+import { serverError } from '@/lib/api/server-error'
 
 const t = getT('Api')
 
@@ -23,7 +24,7 @@ export async function GET() {
     .from('automations')
     .select('*')
     .order('created_at', { ascending: false })
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return serverError(error)
   return NextResponse.json({ automations: data ?? [] })
 }
 
@@ -123,15 +124,12 @@ export async function POST(request: Request) {
     .single()
 
   if (insertErr || !automation) {
-    return NextResponse.json(
-      { error: insertErr?.message ?? t('common.insertFailed') },
-      { status: 500 },
-    )
+    return serverError(insertErr)
   }
 
   if (effectiveSteps && effectiveSteps.length > 0) {
     const err = await insertSteps(automation.id, effectiveSteps)
-    if (err) return NextResponse.json({ error: err }, { status: 500 })
+    if (err) return serverError(err)
   }
 
   return NextResponse.json({ automation }, { status: 201 })

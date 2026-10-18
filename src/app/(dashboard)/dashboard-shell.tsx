@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
 import { AccountAccessAlert } from "@/components/layout/account-access-alert";
+import { isDemoPreview } from "@/lib/demo";
 import { PresenceHeartbeat } from "@/components/presence/presence-heartbeat";
 import { BrowserNotificationsListener } from "@/components/notifications/browser-notifications-listener";
 
@@ -59,6 +60,14 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
           {/* Above every page: writes are being rejected and here's why.
               Renders nothing unless the account/role failed to resolve. */}
           <AccountAccessAlert />
+          {isDemoPreview() ? (
+            <p className="mb-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
+              <strong className="font-semibold">Demo preview:</strong> these are
+              the real screens running without a database. The dashboard shows
+              sample numbers, other lists start empty, and nothing is saved. Add
+              your keys to .env.local to use the app for real.
+            </p>
+          ) : null}
           {children}
         </main>
       </div>

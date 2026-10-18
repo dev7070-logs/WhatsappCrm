@@ -4,18 +4,13 @@ import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { ArrowRight, Lock, Mail, UsersRound } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { MessageSquare, UsersRound } from "lucide-react";
+import { AuthShell } from "@/components/auth/auth-shell";
+import { AuthField, FormAlert, SubmitButton } from "@/components/auth/auth-field";
+import { GoogleButton, OrDivider } from "@/components/auth/google-button";
+import { useCaptcha } from "@/components/auth/captcha";
+import { useAuthErrorMessage } from "@/components/auth/use-auth-error";
 
 // `useSearchParams` opts the component out of static prerendering
 // unless it sits under a Suspense boundary. We split the form into
@@ -51,20 +46,29 @@ function LoginPageInner() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const supabase = createClient();
+  const captcha = useCaptcha();
+  const authMessage = useAuthErrorMessage();
+
+  const destination = inviteToken
+    ? `/join/${encodeURIComponent(inviteToken)}`
+    : "/dashboard";
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { error } = await createClient().auth.signInWithPassword({
       email,
       password,
+      options: { captchaToken: captcha.token },
     });
 
     if (error) {
-      setError(error.message);
+      // Fixed message per category — never Supabase's raw text, which
+      // could reveal whether the email has an account.
+      setError(authMessage(error));
+      captcha.reset();
       setLoading(false);
       return;
     }
@@ -77,107 +81,91 @@ function LoginPageInner() {
     // back to /login — which looks like the page "just refreshing"
     // instead of signing in (issue #365). Mirrors the deliberate full
     // reload the invite-accept flow already uses in join/[token].
-    const destination = inviteToken
-      ? `/join/${encodeURIComponent(inviteToken)}`
-      : "/dashboard";
     window.location.href = destination;
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md border-border bg-card">
-        <CardHeader className="items-center text-center">
-          <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-            {inviteToken ? (
-              <UsersRound className="h-6 w-6 text-primary" />
-            ) : (
-              <MessageSquare className="h-6 w-6 text-primary" />
-            )}
-          </div>
-          <CardTitle className="text-xl text-foreground">
-            {inviteToken ? t('titleAccept') : t('titleWelcome')}
-          </CardTitle>
-          <CardDescription className="text-muted-foreground">
-            {inviteToken
-              ? t('descAccept')
-              : t('descWelcome')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleLogin} className="flex flex-col gap-4">
-            {linkErrorMessage && !error && (
-              <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
-                {linkErrorMessage}
-              </div>
-            )}
-            {error && (
-              <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-                {error}
-              </div>
-            )}
+    <AuthShell
+      icon={inviteToken ? <UsersRound className="h-6 w-6" /> : undefined}
+      title={inviteToken ? t("titleAccept") : t("titleWelcome")}
+      description={inviteToken ? t("descAccept") : t("descWelcome")}
+      footer={
+        <>
+          {t("noAccount")}{" "}
+          <Link
+            href={
+              inviteToken
+                ? `/signup?invite=${encodeURIComponent(inviteToken)}`
+                : "/signup"
+            }
+            className="font-semibold text-primary underline-offset-4 hover:underline"
+          >
+            {t("createAccount")}
+          </Link>
+        </>
+      }
+    >
+      <div className="flex flex-col gap-4">
+        {linkErrorMessage && !error && (
+          <FormAlert tone="warning">{linkErrorMessage}</FormAlert>
+        )}
+        {error && <FormAlert tone="error">{error}</FormAlert>}
+      </div>
 
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="email" className="text-muted-foreground">
-                {t('emailLabel')}
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder={t('emailPlaceholder')}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="border-border bg-muted text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
-              />
-            </div>
+      <div className={error || linkErrorMessage ? "mt-4" : ""}>
+        <GoogleButton
+          next={destination}
+          label={t("continueWithGoogle")}
+          onError={setError}
+        />
+      </div>
 
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-muted-foreground">
-                  {t('passwordLabel')}
-                </Label>
-                <Link
-                  href="/forgot-password"
-                  className="text-sm text-primary hover:text-primary/80"
-                >
-                  {t('forgotPassword')}
-                </Link>
-              </div>
-              <Input
-                id="password"
-                type="password"
-                placeholder={t('passwordPlaceholder')}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="border-border bg-muted text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
-              />
-            </div>
+      <OrDivider label={t("orEmail")} />
 
-            <Button
-              type="submit"
-              disabled={loading}
-              className="mt-2 h-10 w-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-            >
-              {loading ? t('signingIn') : t('signIn')}
-            </Button>
-          </form>
+      <form onSubmit={handleLogin} className="flex flex-col gap-4">
+        <AuthField
+          id="email"
+          type="email"
+          icon={Mail}
+          label={t("emailLabel")}
+          placeholder={t("emailPlaceholder")}
+          autoComplete="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
 
-          <p className="mt-6 text-center text-sm text-muted-foreground">
-            {t('noAccount')}{" "}
+        <AuthField
+          id="password"
+          type="password"
+          icon={Lock}
+          label={t("passwordLabel")}
+          placeholder={t("passwordPlaceholder")}
+          autoComplete="current-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          trailingLabel={
             <Link
-              href={
-                inviteToken
-                  ? `/signup?invite=${encodeURIComponent(inviteToken)}`
-                  : "/signup"
-              }
-              className="text-primary hover:text-primary/80"
+              href="/forgot-password"
+              className="text-sm font-medium text-primary underline-offset-4 hover:underline"
             >
-              {t('createAccount')}
+              {t("forgotPassword")}
             </Link>
-          </p>
-        </CardContent>
-      </Card>
-    </div>
+          }
+        />
+
+        {captcha.widget}
+
+        <SubmitButton
+          loading={loading}
+          disabled={!captcha.ready}
+          loadingLabel={t("signingIn")}
+        >
+          {t("signIn")}
+          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+        </SubmitButton>
+      </form>
+    </AuthShell>
   );
 }

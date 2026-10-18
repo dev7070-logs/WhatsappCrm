@@ -9,6 +9,7 @@ import { loadEmbeddingsKey } from '@/lib/ai/config'
 import { ingestDocument, type IngestResult } from '@/lib/ai/knowledge'
 import { AiError } from '@/lib/ai/types'
 import { getT } from '@/lib/i18n/translate'
+import { MAX_KB_CONTENT_CHARS, MAX_KB_TITLE_CHARS } from '@/lib/api/limits'
 
 const t = getT('Api')
 
@@ -57,6 +58,15 @@ export async function PATCH(request: Request, { params }: Params) {
     }
     if (title !== undefined && !title) {
       return NextResponse.json({ error: t('common.titleEmpty') }, { status: 400 })
+    }
+    if (
+      (title !== undefined && title.length > MAX_KB_TITLE_CHARS) ||
+      (content !== undefined && content.length > MAX_KB_CONTENT_CHARS)
+    ) {
+      return NextResponse.json(
+        { error: t('ai.knowledge.docTooLarge', { max: MAX_KB_CONTENT_CHARS }) },
+        { status: 400 },
+      )
     }
     if (content !== undefined && !content) {
       return NextResponse.json({ error: t('ai.knowledge.contentEmpty') }, { status: 400 })

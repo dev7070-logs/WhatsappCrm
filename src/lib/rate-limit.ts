@@ -97,6 +97,21 @@ export function checkRateLimit(
  * draft-ietf-httpapi-ratelimit-headers). Callers just `return` this.
  */
 export function getClientIp(request: Request): string {
+  // Request headers are client-controlled unless a proxy you trust
+  // rewrites them. Set TRUSTED_CLIENT_IP_HEADER to the single header
+  // your host guarantees (e.g. `cf-connecting-ip` behind Cloudflare,
+  // `x-real-ip` behind an nginx that sets it) and only that header is
+  // read — a forged `X-Real-IP` / `X-Forwarded-For` can no longer mint
+  // a fresh rate-limit bucket per request. Unset keeps the default
+  // order below, which suits the common "one proxy in front" setup.
+  const pinned = process.env.TRUSTED_CLIENT_IP_HEADER?.trim().toLowerCase();
+  if (pinned) {
+    const raw = request.headers.get(pinned) ?? '';
+    // For a list header (x-forwarded-for) the trusted proxy's own
+    // append is the last hop.
+    const hops = raw.split(',').map((hop) => hop.trim()).filter(Boolean);
+    return hops[hops.length - 1] ?? 'unknown';
+  }
   const realIp = request.headers.get('x-real-ip')?.trim();
   if (realIp) return realIp;
   const forwardedFor = request.headers.get('x-forwarded-for');
@@ -158,6 +173,14 @@ export const RATE_LIMITS = {
    *  successful redemption mutates two profiles and an invite row, so
    *  the abuse surface is "spam join attempts." */
   invitationRedeem: { limit: 10, windowMs: 60_000 },
+  /** Public WhatsApp webhook verification (GET, per-IP). Meta calls it
+   *  once when you save the webhook URL; each call decrypts every
+   *  tenant's verify token, so it is capped to stop it being used as
+   *  a CPU-burning DoS lever. */
+  webhookVerify: { limit: 10, windowMs: 60_000 },
+  /** Failed public-API key lookups (per-IP). Valid keys get their own
+   *  per-key budget; this only bounds guessing / scanning traffic. */
+  apiKeyFailures: { limit: 20, windowMs: 60_000 },
   /** Admin-only account / member-management actions: create/revoke
    *  invitation, rename account, change member role, remove member,
    *  transfer ownership. 30/min per user is comfortably above any

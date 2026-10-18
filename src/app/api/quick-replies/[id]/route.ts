@@ -7,6 +7,7 @@ import {
   type StoredQuickReply,
 } from '@/lib/quick-replies/patch'
 import { getT } from '@/lib/i18n/translate'
+import { serverError } from '@/lib/api/server-error'
 
 const t = getT('Api')
 
@@ -43,7 +44,7 @@ export async function PATCH(
     .eq('id', id)
     .eq('account_id', ctx.accountId)
     .maybeSingle()
-  if (loadError) return NextResponse.json({ error: loadError.message }, { status: 500 })
+  if (loadError) return serverError(loadError)
   if (!stored) return notFound()
 
   const patch = resolveQuickReplyPatch(body, stored as StoredQuickReply)
@@ -58,7 +59,7 @@ export async function PATCH(
     .update(patch.update)
     .eq('id', id)
     .eq('account_id', ctx.accountId)
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return serverError(error)
   return NextResponse.json({ ok: true })
 }
 
@@ -82,7 +83,7 @@ export async function DELETE(
     .eq('id', id)
     .eq('account_id', ctx.accountId)
     .select('id')
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return serverError(error)
   if (!deleted || deleted.length === 0) return notFound()
   return NextResponse.json({ ok: true })
 }

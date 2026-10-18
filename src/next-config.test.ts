@@ -33,3 +33,24 @@ describe("next.config Cache-Control", () => {
     },
   );
 });
+
+describe("next.config security headers", () => {
+  async function headersFor(pathname: string) {
+    const rules = (await nextConfig.headers?.()) ?? [];
+    return rules
+      .filter((rule) => getPathMatch(rule.source, { strict: true })(pathname))
+      .flatMap((rule) => rule.headers);
+  }
+
+  it("enforces a Content-Security-Policy (not report-only)", async () => {
+    const headers = await headersFor("/login");
+    const csp = headers.find((h) => h.key === "Content-Security-Policy");
+    expect(csp?.value).toContain("frame-ancestors 'none'");
+    expect(csp?.value).toContain("object-src 'none'");
+    expect(headers.some((h) => h.key.endsWith("-Report-Only"))).toBe(false);
+  });
+
+  it("does not advertise the framework", () => {
+    expect(nextConfig.poweredByHeader).toBe(false);
+  });
+});

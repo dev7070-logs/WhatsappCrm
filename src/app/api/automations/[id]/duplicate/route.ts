@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { requireRole, toErrorResponse } from '@/lib/auth/account'
 import { supabaseAdmin } from '@/lib/automations/admin-client'
 import { getT } from '@/lib/i18n/translate'
+import { serverError } from '@/lib/api/server-error'
 
 const t = getT('Api')
 
@@ -36,7 +37,7 @@ export async function POST(
     .eq('id', id)
     .eq('account_id', accountId)
     .maybeSingle()
-  if (origErr) return NextResponse.json({ error: origErr.message }, { status: 500 })
+  if (origErr) return serverError(origErr)
   if (!original) return NextResponse.json({ error: t('common.notFound') }, { status: 404 })
 
   const { data: copy, error: copyErr } = await admin
@@ -57,7 +58,7 @@ export async function POST(
     .select()
     .single()
   if (copyErr || !copy) {
-    return NextResponse.json({ error: copyErr?.message ?? t('automations.copyFailed') }, { status: 500 })
+    return serverError(copyErr ?? t('automations.copyFailed'))
   }
 
   const { data: steps } = await admin
@@ -86,7 +87,7 @@ export async function POST(
       position: row.position,
     }))
     const { error: insErr } = await admin.from('automation_steps').insert(rows)
-    if (insErr) return NextResponse.json({ error: insErr.message }, { status: 500 })
+    if (insErr) return serverError(insErr)
   }
 
   return NextResponse.json({ automation: copy }, { status: 201 })

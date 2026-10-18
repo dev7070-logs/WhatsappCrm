@@ -16,6 +16,7 @@ import {
   RATE_LIMITS,
 } from '@/lib/rate-limit'
 import { getT } from '@/lib/i18n/translate'
+import { MAX_BROADCAST_RECIPIENTS, MAX_TEMPLATE_PARAM_CHARS, MAX_TEMPLATE_PARAMS } from '@/lib/api/limits'
 
 const t = getT('Api')
 
@@ -112,6 +113,35 @@ export async function POST(request: Request) {
           error:
             t('broadcast.recipientsRequired'),
         },
+        { status: 400 }
+      )
+    }
+
+    // Server-side caps — one request must not fan out into an
+    // unbounded number of paid WhatsApp sends.
+    if (recipients.length > MAX_BROADCAST_RECIPIENTS) {
+      return NextResponse.json(
+        { error: t('broadcast.tooManyRecipients', { max: MAX_BROADCAST_RECIPIENTS }) },
+        { status: 400 }
+      )
+    }
+    const recipientsValid = recipients.every(
+      (r) =>
+        !!r &&
+        typeof r === 'object' &&
+        typeof r.phone === 'string' &&
+        r.phone.length > 0 &&
+        r.phone.length <= 32 &&
+        (r.params === undefined ||
+          (Array.isArray(r.params) &&
+            r.params.length <= MAX_TEMPLATE_PARAMS &&
+            r.params.every(
+              (p: unknown) => typeof p === 'string' && p.length <= MAX_TEMPLATE_PARAM_CHARS
+            )))
+    )
+    if (!recipientsValid) {
+      return NextResponse.json(
+        { error: t('broadcast.invalidRecipients') },
         { status: 400 }
       )
     }

@@ -4,17 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { MessageSquare, CheckCircle, ArrowLeft } from "lucide-react";
+import { AuthShell } from "@/components/auth/auth-shell";
+import { AuthField, FormAlert, SubmitButton } from "@/components/auth/auth-field";
+import { ArrowLeft, CheckCircle, KeyRound, Mail } from "lucide-react";
+import { useCaptcha } from "@/components/auth/captcha";
+import { useAuthErrorMessage } from "@/components/auth/use-auth-error";
+import { classifyAuthError } from "@/lib/auth/auth-errors";
 
 export default function ForgotPasswordPage() {
   const t = useTranslations("ForgotPasswordPage");
@@ -22,7 +17,8 @@ export default function ForgotPasswordPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const supabase = createClient();
+  const captcha = useCaptcha();
+  const authMessage = useAuthErrorMessage();
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,12 +30,19 @@ export default function ForgotPasswordPage() {
     // #592). Supabase must allow this origin under Authentication →
     // URL Configuration → Redirect URLs, or it silently falls back to
     // its Site URL; see docs/auth-emails.md.
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    const { error } = await createClient().auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/reset-password")}`,
+      captchaToken: captcha.token,
     });
+    captcha.reset();
 
-    if (error) {
-      setError(error.message);
+    // Only errors the visitor can act on (slow down / redo the bot
+    // check) are shown. Everything else — including "no such user" —
+    // falls through to the same neutral "if an account exists…"
+    // screen, so this form can't reveal who has an account.
+    const kind = error ? classifyAuthError(error) : null;
+    if (kind === "rate_limited" || kind === "captcha_failed") {
+      setError(authMessage(error));
       setLoading(false);
       return;
     }
@@ -48,94 +51,66 @@ export default function ForgotPasswordPage() {
     setLoading(false);
   };
 
+  const backLink = (
+    <Link
+      href="/login"
+      className="group inline-flex items-center gap-2 font-medium text-muted-foreground transition-colors hover:text-foreground"
+    >
+      <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+      {t("backToSignIn")}
+    </Link>
+  );
+
   if (success) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-4">
-        <Card className="w-full max-w-md border-border bg-card">
-          <CardHeader className="items-center text-center">
-            <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-              <CheckCircle className="h-6 w-6 text-primary" />
-            </div>
-            <CardTitle className="text-xl text-foreground">
-              {t("checkEmailTitle")}
-            </CardTitle>
-            <CardDescription className="text-muted-foreground">
-              {t.rich("checkEmailDesc", {
-                email,
-                strong: (chunks) => (
-                  <span className="text-foreground">{chunks}</span>
-                ),
-              })}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link href="/login">
-              <Button
-                variant="outline"
-                className="w-full border-border text-muted-foreground hover:bg-muted hover:text-foreground"
-              >
-                {t("backToSignIn")}
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
+      <AuthShell
+        icon={<CheckCircle className="h-6 w-6" />}
+        title={t("checkEmailTitle")}
+        description={t.rich("checkEmailDesc", {
+          email,
+          strong: (chunks) => (
+            <span className="font-medium text-foreground">{chunks}</span>
+          ),
+        })}
+        footer={backLink}
+      >
+        {null}
+      </AuthShell>
     );
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md border-border bg-card">
-        <CardHeader className="items-center text-center">
-          <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-            <MessageSquare className="h-6 w-6 text-primary" />
-          </div>
-          <CardTitle className="text-xl text-foreground">{t("title")}</CardTitle>
-          <CardDescription className="text-muted-foreground">
-            {t("desc")}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleReset} className="flex flex-col gap-4">
-            {error && (
-              <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-                {error}
-              </div>
-            )}
+    <AuthShell
+      icon={<KeyRound className="h-6 w-6" />}
+      title={t("title")}
+      description={t("desc")}
+      footer={backLink}
+    >
+      <form onSubmit={handleReset} className="flex flex-col gap-4">
+        {error && <FormAlert tone="error">{error}</FormAlert>}
 
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="email" className="text-muted-foreground">
-                {t("emailLabel")}
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder={t("emailPlaceholder")}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="border-border bg-muted text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
-              />
-            </div>
+        <AuthField
+          id="email"
+          type="email"
+          icon={Mail}
+          label={t("emailLabel")}
+          placeholder={t("emailPlaceholder")}
+          autoComplete="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
 
-            <Button
-              type="submit"
-              disabled={loading}
-              className="mt-2 h-10 w-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-            >
-              {loading ? t("sending") : t("sendLink")}
-            </Button>
-          </form>
+        {captcha.widget}
 
-          <Link
-            href="/login"
-            className="mt-6 flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            {t("backToSignIn")}
-          </Link>
-        </CardContent>
-      </Card>
-    </div>
+        <SubmitButton
+          loading={loading}
+          disabled={!captcha.ready}
+          loadingLabel={t("sending")}
+        >
+          {t("sendLink")}
+        </SubmitButton>
+      </form>
+    </AuthShell>
   );
 }

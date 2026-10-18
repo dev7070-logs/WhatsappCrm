@@ -37,6 +37,15 @@ BEGIN
     RAISE EXCEPTION 'the flow-media bucket row was not created (migration 016)';
   END IF;
 
+  -- 060: cross-account assignment guard.
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger
+     WHERE tgname = 'conversations_assignee_same_account'
+       AND tgrelid = 'public.conversations'::regclass
+  ) THEN
+    RAISE EXCEPTION 'conversations_assignee_same_account trigger missing (migration 060)';
+  END IF;
+
   -- Account scoping (017) is load-bearing for every RLS policy.
   IF to_regclass('public.accounts') IS NULL THEN
     RAISE EXCEPTION 'public.accounts is missing — migration 017 did not apply';

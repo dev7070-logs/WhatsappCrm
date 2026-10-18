@@ -15,7 +15,9 @@ export async function GET(
   try {
     const { mediaId } = await params
 
-    if (!mediaId) {
+    // WhatsApp media ids are numeric. Anything else could inject a path
+    // or query into the Graph API URL built from it.
+    if (!mediaId || !/^\d{1,32}$/.test(mediaId)) {
       return NextResponse.json(
         { error: t('media.idRequired') },
         { status: 400 }

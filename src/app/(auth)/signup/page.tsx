@@ -4,18 +4,22 @@ import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { MessageSquare, CheckCircle, UsersRound } from "lucide-react";
+  ArrowRight,
+  CheckCircle,
+  Lock,
+  Mail,
+  User,
+  UsersRound,
+} from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { AuthShell } from "@/components/auth/auth-shell";
+import { AuthField, FormAlert, SubmitButton } from "@/components/auth/auth-field";
+import { GoogleButton, OrDivider } from "@/components/auth/google-button";
+import { cn } from "@/lib/utils";
+import { useCaptcha } from "@/components/auth/captcha";
+import { useAuthErrorMessage } from "@/components/auth/use-auth-error";
+import { classifyAuthError, MIN_PASSWORD_LENGTH } from "@/lib/auth/auth-errors";
 
 // `useSearchParams` opts the component out of static prerendering
 // unless wrapped in Suspense — same pattern as /login.
@@ -25,6 +29,16 @@ export default function SignupPage() {
       <SignupPageInner />
     </Suspense>
   );
+}
+
+/** 0–4: length, mixed case, digit, symbol. Display-only, not a policy. */
+function passwordScore(pw: string): number {
+  if (!pw) return 0;
+  let score = pw.length >= 8 ? 1 : 0;
+  if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) score++;
+  if (/\d/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  return Math.max(score, 1);
 }
 
 function SignupPageInner() {
@@ -44,7 +58,15 @@ function SignupPageInner() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const supabase = createClient();
+  const captcha = useCaptcha();
+  const authMessage = useAuthErrorMessage();
+
+  const next = inviteToken
+    ? `/join/${encodeURIComponent(inviteToken)}`
+    : "/dashboard";
+  const loginHref = inviteToken
+    ? `/login?invite=${encodeURIComponent(inviteToken)}`
+    : "/login";
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,7 +77,7 @@ function SignupPageInner() {
       return;
     }
 
-    if (password.length < 6) {
+    if (password.length < MIN_PASSWORD_LENGTH) {
       setError(t("passwordTooShort"));
       return;
     }
@@ -72,12 +94,9 @@ function SignupPageInner() {
     // for a session and forwards to `next` (issue #592). Supabase still
     // has to allow this origin under Authentication → URL Configuration
     // → Redirect URLs; see docs/auth-emails.md.
-    const next = inviteToken
-      ? `/join/${encodeURIComponent(inviteToken)}`
-      : "/dashboard";
     const emailRedirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
 
-    const { error } = await supabase.auth.signUp({
+    const { error } = await createClient().auth.signUp({
       email,
       password,
       options: {
@@ -85,11 +104,16 @@ function SignupPageInner() {
           full_name: fullName,
         },
         emailRedirectTo,
+        captchaToken: captcha.token,
       },
     });
+    captcha.reset();
 
-    if (error) {
-      setError(error.message);
+    // An already-registered email gets the same "check your inbox"
+    // screen as a new one, so sign-up can't be used to discover which
+    // emails have accounts.
+    if (error && classifyAuthError(error) !== "account_exists") {
+      setError(authMessage(error));
       setLoading(false);
       return;
     }
@@ -100,155 +124,153 @@ function SignupPageInner() {
 
   if (success) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-4">
-        <Card className="w-full max-w-md border-border bg-card">
-          <CardHeader className="items-center text-center">
-            <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-              <CheckCircle className="h-6 w-6 text-primary" />
-            </div>
-            <CardTitle className="text-xl text-foreground">
-              {t("checkEmailTitle")}
-            </CardTitle>
-            <CardDescription className="text-muted-foreground">
-              {t.rich("checkEmailDesc", {
-                email,
-                strong: (chunks) => (
-                  <span className="text-foreground">{chunks}</span>
-                ),
-              })}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link
-              href={
-                inviteToken
-                  ? `/login?invite=${encodeURIComponent(inviteToken)}`
-                  : "/login"
-              }
-            >
-              <Button
-                variant="outline"
-                className="w-full border-border text-muted-foreground hover:bg-muted hover:text-foreground"
-              >
-                {t("backToSignIn")}
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
+      <AuthShell
+        icon={<CheckCircle className="h-6 w-6" />}
+        title={t("checkEmailTitle")}
+        description={t.rich("checkEmailDesc", {
+          email,
+          strong: (chunks) => (
+            <span className="font-medium text-foreground">{chunks}</span>
+          ),
+        })}
+      >
+        <Link
+          href={loginHref}
+          className="flex h-12 w-full items-center justify-center rounded-full border border-input text-[15px] font-medium text-foreground transition-all hover:bg-muted hover:shadow-elev-1"
+        >
+          {t("backToSignIn")}
+        </Link>
+      </AuthShell>
     );
   }
 
+  const score = passwordScore(password);
+  const strengthLabels = [
+    "",
+    t("strengthWeak"),
+    t("strengthFair"),
+    t("strengthGood"),
+    t("strengthStrong"),
+  ];
+  const strengthColors = [
+    "bg-border",
+    "bg-red-500",
+    "bg-amber-500",
+    "bg-lime-500",
+    "bg-primary",
+  ];
+  const mismatch = confirmPassword.length > 0 && confirmPassword !== password;
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md border-border bg-card">
-        <CardHeader className="items-center text-center">
-          <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-            {inviteToken ? (
-              <UsersRound className="h-6 w-6 text-primary" />
-            ) : (
-              <MessageSquare className="h-6 w-6 text-primary" />
-            )}
-          </div>
-          <CardTitle className="text-xl text-foreground">
-            {inviteToken ? t("titleJoin") : t("title")}
-          </CardTitle>
-          <CardDescription className="text-muted-foreground">
-            {inviteToken ? t("descJoin") : t("desc")}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSignup} className="flex flex-col gap-4">
-            {error && (
-              <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-                {error}
+    <AuthShell
+      icon={inviteToken ? <UsersRound className="h-6 w-6" /> : undefined}
+      title={inviteToken ? t("titleJoin") : t("title")}
+      description={inviteToken ? t("descJoin") : t("desc")}
+      footer={
+        <>
+          {t("haveAccount")}{" "}
+          <Link
+            href={loginHref}
+            className="font-semibold text-primary underline-offset-4 hover:underline"
+          >
+            {t("signIn")}
+          </Link>
+        </>
+      }
+    >
+      {error && (
+        <div className="mb-4">
+          <FormAlert tone="error">{error}</FormAlert>
+        </div>
+      )}
+
+      <GoogleButton next={next} label={t("signUpWithGoogle")} onError={setError} />
+
+      <OrDivider label={t("orEmail")} />
+
+      <form onSubmit={handleSignup} className="flex flex-col gap-4">
+        <AuthField
+          id="fullName"
+          icon={User}
+          label={t("fullNameLabel")}
+          placeholder={t("fullNamePlaceholder")}
+          autoComplete="name"
+          value={fullName}
+          onChange={(e) => setFullName(e.target.value)}
+          required
+        />
+
+        <AuthField
+          id="email"
+          type="email"
+          icon={Mail}
+          label={t("emailLabel")}
+          placeholder={t("emailPlaceholder")}
+          autoComplete="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+
+        <div className="flex flex-col gap-2">
+          <AuthField
+            id="password"
+            type="password"
+            icon={Lock}
+            label={t("passwordLabel")}
+            placeholder={t("passwordPlaceholder")}
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          {password ? (
+            <div className="flex items-center gap-3" aria-live="polite">
+              <div className="grid flex-1 grid-cols-4 gap-1.5">
+                {[1, 2, 3, 4].map((i) => (
+                  <span
+                    key={i}
+                    className={cn(
+                      "h-1.5 rounded-full transition-colors duration-300",
+                      i <= score ? strengthColors[score] : "bg-border",
+                    )}
+                  />
+                ))}
               </div>
-            )}
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="fullName" className="text-muted-foreground">
-                {t("fullNameLabel")}
-              </Label>
-              <Input
-                id="fullName"
-                type="text"
-                placeholder={t("fullNamePlaceholder")}
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-                className="border-border bg-muted text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
-              />
+              <span className="w-14 text-right text-xs font-medium text-muted-foreground">
+                {strengthLabels[score]}
+              </span>
             </div>
+          ) : null}
+        </div>
 
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="email" className="text-muted-foreground">
-                {t("emailLabel")}
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder={t("emailPlaceholder")}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="border-border bg-muted text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
-              />
-            </div>
+        <AuthField
+          id="confirmPassword"
+          type="password"
+          icon={Lock}
+          label={t("confirmPasswordLabel")}
+          placeholder={t("confirmPasswordPlaceholder")}
+          autoComplete="new-password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          aria-invalid={mismatch}
+          className={mismatch ? "border-red-500/60 focus:border-red-500 focus:ring-red-500/15" : undefined}
+          required
+        />
 
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="password" className="text-muted-foreground">
-                {t("passwordLabel")}
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder={t("passwordPlaceholder")}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="border-border bg-muted text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
-              />
-            </div>
+        {captcha.widget}
 
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="confirmPassword" className="text-muted-foreground">
-                {t("confirmPasswordLabel")}
-              </Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder={t("confirmPasswordPlaceholder")}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                className="border-border bg-muted text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
-              />
-            </div>
+        <SubmitButton
+          loading={loading}
+          disabled={!captcha.ready}
+          loadingLabel={t("creating")}
+        >
+          {t("submit")}
+          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+        </SubmitButton>
 
-            <Button
-              type="submit"
-              disabled={loading}
-              className="mt-2 h-10 w-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-            >
-              {loading ? t("creating") : t("submit")}
-            </Button>
-          </form>
-
-          <p className="mt-6 text-center text-sm text-muted-foreground">
-            {t("haveAccount")}{" "}
-            <Link
-              href={
-                inviteToken
-                  ? `/login?invite=${encodeURIComponent(inviteToken)}`
-                  : "/login"
-              }
-              className="text-primary hover:text-primary/80"
-            >
-              {t("signIn")}
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
-    </div>
+        <p className="text-center text-xs text-muted-foreground">{t("terms")}</p>
+      </form>
+    </AuthShell>
   );
 }

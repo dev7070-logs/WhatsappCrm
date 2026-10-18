@@ -77,6 +77,11 @@ export async function POST(
     return NextResponse.json({ error: t('common.unauthorized') }, { status: 401 });
   }
 
+  // Second bucket keyed by the signed-in user — the per-IP one above
+  // can be sidestepped by rotating spoofable forwarding headers.
+  const userLimit = checkRateLimit(`redeem:user:${user.id}`, RATE_LIMITS.invitationRedeem);
+  if (!userLimit.success) return rateLimitResponse(userLimit);
+
   const { data: accountId, error } = await supabase.rpc("redeem_invitation", {
     p_token_hash: hashInviteToken(token),
   });

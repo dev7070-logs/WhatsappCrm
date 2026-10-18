@@ -1,23 +1,34 @@
 import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages, getTranslations } from 'next-intl/server';
-import { Inter } from "next/font/google";
+import { Plus_Jakarta_Sans, Roboto } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
+import { pickMessages } from "@/i18n/pick-messages";
 import { ThemeProvider } from "@/hooks/use-theme";
 import { ThemedToaster } from "@/components/themed-toaster";
 import {
   DEFAULT_MODE,
   DEFAULT_THEME,
+  FOLLOW_SYSTEM_MODE,
   MODE_STORAGE_KEY,
   MODES,
   STORAGE_KEY,
   THEME_IDS,
 } from "@/lib/themes";
 
-const inter = Inter({
+// Material pairing: Roboto for UI text, Plus Jakarta Sans for display
+// headings (wired to --font-display / font-heading in globals.css).
+const roboto = Roboto({
   variable: "--font-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "700"],
+});
+
+const jakarta = Plus_Jakarta_Sans({
+  variable: "--font-display",
+  subsets: ["latin"],
+  weight: ["500", "600", "700", "800"],
 });
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -30,8 +41,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const metadata: Metadata = {
   title: {
-    default: "wacrm",
-    template: "%s — wacrm",
+    default: "WaFlow — WhatsApp CRM",
+    template: "%s — WaFlow",
   },
   robots: {
     index: false,
@@ -48,7 +59,10 @@ const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#020617",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f6f9f9" },
+    { media: "(prefers-color-scheme: dark)", color: "#121616" },
+  ],
   colorScheme: "dark light",
 };
 
@@ -76,7 +90,13 @@ const THEME_BOOT_SCRIPT = `
     var MODE_DEFAULT = ${JSON.stringify(DEFAULT_MODE)};
     var MODES = ${JSON.stringify(MODES)};
     var savedMode = localStorage.getItem(MODE_KEY);
-    d.dataset.mode = MODES.indexOf(savedMode) !== -1 ? savedMode : MODE_DEFAULT;
+    if (MODES.indexOf(savedMode) === -1) {
+      // No explicit choice yet: follow the OS setting.
+      savedMode = ${JSON.stringify(FOLLOW_SYSTEM_MODE)} && window.matchMedia
+        ? (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark")
+        : MODE_DEFAULT;
+    }
+    d.dataset.mode = savedMode;
   } catch (_e) {
     d.dataset.theme = ${JSON.stringify(DEFAULT_THEME)};
     d.dataset.mode = ${JSON.stringify(DEFAULT_MODE)};
@@ -97,7 +117,7 @@ export default async function RootLayout({
       lang={locale}
       data-theme={DEFAULT_THEME}
       data-mode={DEFAULT_MODE}
-      className={`${inter.variable} h-full antialiased`}
+      className={`${roboto.variable} ${jakarta.variable} h-full antialiased`}
       // The `theme-boot` script below rewrites `data-theme` and
       // `data-mode` on <html> from localStorage before React hydrates,
       // so for any non-default choice the client DOM intentionally
@@ -115,7 +135,12 @@ export default async function RootLayout({
         />
       </head>
       <body className="min-h-full bg-background text-foreground font-sans">
-        <NextIntlClientProvider messages={messages} locale={locale}>
+        {/* Only what the public shell needs; the dashboard, auth and
+            invite layouts add their own namespaces (see pickMessages). */}
+        <NextIntlClientProvider
+          messages={pickMessages(messages, ["ModeToggle"])}
+          locale={locale}
+        >
           <ThemeProvider>
             {children}
             <ThemedToaster />

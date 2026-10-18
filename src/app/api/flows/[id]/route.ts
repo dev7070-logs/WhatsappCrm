@@ -4,6 +4,7 @@ import { requireRole, toErrorResponse } from '@/lib/auth/account'
 import { supabaseAdmin } from '@/lib/flows/admin-client'
 import { validateFlowForActivation } from '@/lib/flows/validate'
 import { getT } from '@/lib/i18n/translate'
+import { serverError } from '@/lib/api/server-error'
 
 const t = getT('Api')
 
@@ -25,6 +26,7 @@ async function requireOwnership(
   | {
       ok: true
       userId: string
+      accountId: string
       supabase: Awaited<ReturnType<typeof createClient>>
     }
   | { ok: false; status: number; body: { error: string } }
@@ -40,13 +42,13 @@ async function requireOwnership(
   // returns null (404 below).
   const { data: flow } = await supabase
     .from('flows')
-    .select('id')
+    .select('id, account_id')
     .eq('id', flowId)
     .maybeSingle()
   if (!flow) {
     return { ok: false, status: 404, body: { error: t('common.notFound') } }
   }
-  return { ok: true, userId: user.id, supabase }
+  return { ok: true, userId: user.id, accountId: flow.account_id, supabase }
 }
 
 export async function GET(
@@ -139,7 +141,7 @@ export async function PUT(
       })),
     })
     if (nodesErr) {
-      return NextResponse.json({ error: nodesErr.message }, { status: 500 })
+      return serverError(nodesErr)
     }
   }
 
@@ -161,8 +163,11 @@ export async function PUT(
     .from('flows')
     .update(flowPatch)
     .eq('id', id)
+    // Defence in depth: the service-role client bypasses RLS, so pin
+    // the write to the account the ownership check resolved.
+    .eq('account_id', guard.accountId)
   if (updErr) {
-    return NextResponse.json({ error: updErr.message }, { status: 500 })
+    return serverError(updErr)
   }
 
   // Re-fetch and return the new state — the editor uses the response
@@ -236,9 +241,13 @@ export async function DELETE(
   // mechanism in v1, but that's intentional: deleting a flow is a
   // deliberate destructive action and the partial unique index will
   // free up the contact for new triggers immediately.
-  const { error } = await supabaseAdmin().from('flows').delete().eq('id', id)
+  const { error } = await supabaseAdmin()
+    .from('flows')
+    .delete()
+    .eq('id', id)
+    .eq('account_id', guard.accountId)
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return serverError(error)
   }
   return NextResponse.json({ ok: true })
 }

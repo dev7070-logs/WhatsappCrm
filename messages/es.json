@@ -14,7 +14,9 @@
     "noAccount": "¿No tienes una cuenta?",
     "createAccount": "Crear cuenta",
     "linkExpired": "Ese enlace expiró. Para restablecer la contraseña, usa “¿Olvidaste tu contraseña?” y pide uno nuevo; si estabas confirmando tu correo, regístrate de nuevo.",
-    "linkInvalid": "No se pudo iniciar sesión con ese enlace. Si estabas confirmando tu correo, es posible que ya esté verificado; inicia sesión abajo. Para restablecer la contraseña, pide un enlace nuevo y ábrelo en el mismo navegador desde el que lo solicitaste."
+    "linkInvalid": "No se pudo iniciar sesión con ese enlace. Si estabas confirmando tu correo, es posible que ya esté verificado; inicia sesión abajo. Para restablecer la contraseña, pide un enlace nuevo y ábrelo en el mismo navegador desde el que lo solicitaste.",
+    "continueWithGoogle": "Continuar con Google",
+    "orEmail": "o inicia sesión con tu correo"
   },
   "Sidebar": {
     "title": "Plantilla de CRM para WhatsApp",
@@ -1667,7 +1669,7 @@
       "done": "Listo",
       "dialogTitle": "Invitar a un compañero",
       "networkError": "No se pudo conectar con el servidor. ¿Intentar de nuevo?",
-      "fallbackAccountName": "nuestra cuenta de wacrm",
+      "fallbackAccountName": "nuestra cuenta de WaFlow",
       "dialogDesc": "Genera un enlace de invitación de un solo uso. Compártelo por WhatsApp, Slack o el canal que prefieras; no se necesita servicio de correo.",
       "roleLabel": "Rol",
       "validForLabel": "Enlace válido por",
@@ -1684,7 +1686,7 @@
       "labelTooLong": "La etiqueta debe tener {max} caracteres o menos",
       "copied": "Enlace de invitación copiado",
       "clipboardBlocked": "Portapapeles bloqueado: copia el enlace manualmente",
-      "whatsappMessage": "Únete a {accountName} en wacrm con este enlace (válido por {expiresInDays} días): {url}",
+      "whatsappMessage": "Únete a {accountName} en WaFlow con este enlace (válido por {expiresInDays} días): {url}",
       "createFailed": "No se pudo crear la invitación"
     },
     "tagsAndFields": {
@@ -1804,8 +1806,8 @@
       "saveResubmit": "Guardar y reenviar",
       "submitApproval": "Enviar para aprobación",
       "deleteDialogTitle": "¿Eliminar plantilla?",
-      "deleteMetaDesc": "\"{name}\" se eliminará de Meta y de wacrm. Las difusiones activas que usen esta plantilla empezarán a fallar en su próximo envío. No se puede deshacer.",
-      "deleteLocalDesc": "\"{name}\" se eliminará de wacrm. Nunca se envió a Meta, así que no hace falta limpieza remota.",
+      "deleteMetaDesc": "\"{name}\" se eliminará de Meta y de WaFlow. Las difusiones activas que usen esta plantilla empezarán a fallar en su próximo envío. No se puede deshacer.",
+      "deleteLocalDesc": "\"{name}\" se eliminará de WaFlow. Nunca se envió a Meta, así que no hace falta limpieza remota.",
       "deleting": "Eliminando…",
       "delete": "Eliminar",
       "toastLoadFailed": "Error al cargar las plantillas",
@@ -1857,7 +1859,7 @@
       "notConnected": "No conectado",
       "connectedDesc": "Tu token de acceso se autentica con Meta. Revisa el estado de registro abajo para saber si los webhooks están realmente conectados.",
       "notConnectedDesc": "Configura abajo tus credenciales de la API de Meta para conectar tu cuenta de WhatsApp Business.",
-      "registered": "Registrado: Meta entregará los eventos a wacrm",
+      "registered": "Registrado: Meta entregará los eventos a WaFlow",
       "notRegistered": "No registrado: Meta no entregará eventos",
       "verifyWithMeta": "Verificar con Meta",
       "subscribedSince": "Suscrito desde {date}. Haz clic en Verificar con Meta si los eventos dejan de llegar.",
@@ -1882,7 +1884,7 @@
       "twoStepPin": "PIN de verificación en dos pasos",
       "optional": "(opcional)",
       "pinPlaceholder": "PIN de 6 dígitos del Administrador de WhatsApp de Meta",
-      "pinHint": "Solo se necesita para recibir mensajes entrantes en un número de producción. Configúralo en Meta Business Manager → Cuentas de WhatsApp → Números de teléfono → Verificación en dos pasos y pégalo aquí para que wacrm pueda suscribir el número; de lo contrario, Meta envía los eventos entrantes a la última app que reclamó el número (el síntoma que afecta a segundos números bajo una WABA compartida). Los números de prueba de Meta no tienen PIN y ya vienen registrados: déjalo en blanco para ellos. Dejarlo en blanco también mantiene intacto un registro existente.",
+      "pinHint": "Solo se necesita para recibir mensajes entrantes en un número de producción. Configúralo en Meta Business Manager → Cuentas de WhatsApp → Números de teléfono → Verificación en dos pasos y pégalo aquí para que WaFlow pueda suscribir el número; de lo contrario, Meta envía los eventos entrantes a la última app que reclamó el número (el síntoma que afecta a segundos números bajo una WABA compartida). Los números de prueba de Meta no tienen PIN y ya vienen registrados: déjalo en blanco para ellos. Dejarlo en blanco también mantiene intacto un registro existente.",
       "webhookTitle": "Configuración del webhook",
       "webhookDesc": "Usa esta URL como callback del webhook en el panel de la app de Meta.",
       "webhookUrl": "URL de callback del webhook",
@@ -2130,7 +2132,7 @@
     },
     "aiConfig": {
       "title": "Configuración del agente",
-      "description": "Usa tu propia clave de OpenAI, Anthropic o de una API compatible con OpenAI. wacrm llama al proveedor directamente con tu clave, sin cargos de IA por puesto, y tus datos siguen siendo tuyos. Esto impulsa las respuestas redactadas por IA, el bot de respuesta automática y el Playground.",
+      "description": "Usa tu propia clave de OpenAI, Anthropic o de una API compatible con OpenAI. WaFlow llama al proveedor directamente con tu clave, sin cargos de IA por puesto, y tus datos siguen siendo tuyos. Esto impulsa las respuestas redactadas por IA, el bot de respuesta automática y el Playground.",
       "adminOnlyConfig": "Solo los administradores y propietarios pueden cambiar la configuración de IA.",
       "loadFailed": "Error al cargar la configuración de IA",
       "providerAndKey": "Proveedor y clave",
@@ -2226,7 +2228,7 @@
   },
   "SignupPage": {
     "passwordsMismatch": "Las contraseñas no coinciden",
-    "passwordTooShort": "La contraseña debe tener al menos 6 caracteres",
+    "passwordTooShort": "La contraseña debe tener al menos 8 caracteres",
     "checkEmailTitle": "Revisa tu correo",
     "checkEmailDesc": "Enviamos un enlace de confirmación a <strong>{email}</strong>. Revisa tu bandeja de entrada y haz clic en el enlace para verificar tu cuenta.",
     "backToSignIn": "Volver a iniciar sesión",
@@ -2239,17 +2241,24 @@
     "emailLabel": "Correo electrónico",
     "emailPlaceholder": "you@example.com",
     "passwordLabel": "Contraseña",
-    "passwordPlaceholder": "Al menos 6 caracteres",
+    "passwordPlaceholder": "Al menos 8 caracteres",
     "confirmPasswordLabel": "Confirmar contraseña",
     "confirmPasswordPlaceholder": "Repite tu contraseña",
     "creating": "Creando cuenta...",
     "submit": "Crear cuenta",
     "haveAccount": "¿Ya tienes una cuenta?",
-    "signIn": "Iniciar sesión"
+    "signIn": "Iniciar sesión",
+    "signUpWithGoogle": "Regístrate con Google",
+    "orEmail": "o regístrate con tu correo",
+    "strengthWeak": "Débil",
+    "strengthFair": "Aceptable",
+    "strengthGood": "Buena",
+    "strengthStrong": "Fuerte",
+    "terms": "Al crear una cuenta aceptas los Términos y la Política de Privacidad."
   },
   "ForgotPasswordPage": {
     "checkEmailTitle": "Revisa tu correo",
-    "checkEmailDesc": "Enviamos un enlace para restablecer la contraseña a <strong>{email}</strong>. Revisa tu bandeja de entrada.",
+    "checkEmailDesc": "Si existe una cuenta para <strong>{email}</strong>, te enviamos un enlace para restablecer la contraseña. Revisa tu bandeja de entrada.",
     "backToSignIn": "Volver a iniciar sesión",
     "title": "Restablecer contraseña",
     "desc": "Ingresa tu correo y te enviaremos un enlace para restablecerla",
@@ -2262,13 +2271,13 @@
     "title": "Elige una nueva contraseña",
     "desc": "Ingresa una nueva contraseña para tu cuenta.",
     "passwordLabel": "Nueva contraseña",
-    "passwordPlaceholder": "Al menos 6 caracteres",
+    "passwordPlaceholder": "Al menos 8 caracteres",
     "confirmPasswordLabel": "Confirmar nueva contraseña",
     "confirmPasswordPlaceholder": "Repite la nueva contraseña",
     "submit": "Actualizar contraseña",
     "saving": "Actualizando...",
     "passwordsMismatch": "Las contraseñas no coinciden",
-    "passwordTooShort": "La contraseña debe tener al menos 6 caracteres",
+    "passwordTooShort": "La contraseña debe tener al menos 8 caracteres",
     "checking": "Comprobando tu enlace...",
     "expiredTitle": "Este enlace ya no es válido",
     "expiredDesc": "Los enlaces para restablecer la contraseña funcionan una sola vez y expiran pronto. Pide uno nuevo y ábrelo en el mismo navegador desde el que lo solicitaste.",
@@ -2405,7 +2414,7 @@
     }
   },
   "Metadata": {
-    "description": "Plantilla de CRM para WhatsApp que puedes alojar tú mismo."
+    "description": "WaFlow — el CRM de WhatsApp para equipos de ventas y soporte."
   },
   "Currency": {
     "USD": "Dólar estadounidense",
@@ -2825,8 +2834,10 @@
         "saveDocFailed": "Error al guardar el documento",
         "savedIndexFailed": "Guardado, pero la indexación semántica falló ({message}). La búsqueda por palabras clave sigue funcionando; usa Reindexar para reintentar.",
         "savedNotIndexed": "Guardado, pero la indexación falló ({message}). El documento aún no aparece en las búsquedas; usa Reindexar para reintentar.",
-        "savedKeywordOnly": "Guardado solo con búsqueda por palabras clave: no se pudo descifrar tu clave de embeddings (revisa ENCRYPTION_KEY y vuelve a ingresar la clave)."
-      }
+        "savedKeywordOnly": "Guardado solo con búsqueda por palabras clave: no se pudo descifrar tu clave de embeddings (revisa ENCRYPTION_KEY y vuelve a ingresar la clave).",
+        "docTooLarge": "Los documentos están limitados a {max} caracteres. Divide los documentos más grandes."
+      },
+      "messageTooLong": "Cada mensaje puede tener como máximo {max} caracteres."
     },
     "automations": {
       "copyName": "{name} (Copia)",
@@ -2857,7 +2868,9 @@
       "recipientsRequired": "Proporciona `recipients` (preferido) o `phone_numbers`; debe ser una lista no vacía",
       "templateNameRequired": "El nombre de la plantilla es obligatorio",
       "templateMalformed": "El registro local de la plantilla está dañado: usa \"Sincronizar desde Meta\" en Configuración para repararlo antes de enviar la difusión.",
-      "invalidPhoneFormat": "Formato de número de teléfono no válido"
+      "invalidPhoneFormat": "Formato de número de teléfono no válido",
+      "tooManyRecipients": "Una difusión puede tener como máximo {max} destinatarios por solicitud. Divide los envíos más grandes.",
+      "invalidRecipients": "Cada destinatario necesita un número de teléfono y una lista de parámetros de texto."
     },
     "whatsappConfig": {
       "fetchFailed": "Error al obtener la configuración",
@@ -2868,7 +2881,7 @@
       "wabaIdDigits": "El WhatsApp Business Account ID debe contener solo dígitos: cópialo de Meta → WhatsApp → API Setup.",
       "pinDigits": "El PIN debe tener exactamente 6 dígitos.",
       "validateFailed": "Error al validar la configuración",
-      "numberLinkedElsewhere": "Este número de WhatsApp ya está vinculado a otra cuenta en esta instancia. Cada número de teléfono solo puede conectarse a un usuario de wacrm.",
+      "numberLinkedElsewhere": "Este número de WhatsApp ya está vinculado a otra cuenta en esta instancia. Cada número de teléfono solo puede conectarse a un usuario de WaFlow.",
       "encryptFailed": "Error al cifrar el token. Verifica que ENCRYPTION_KEY sea una cadena hexadecimal válida de 64 caracteres en tus variables de entorno.",
       "updateFailed": "Error al actualizar la configuración",
       "saveFailed": "Error al guardar la configuración",
@@ -2923,5 +2936,14 @@
       "metaApiStatus": "Error de la API de Meta: {status}",
       "syncFailed": "Error al sincronizar las plantillas"
     }
+  },
+  "AuthErrors": {
+    "invalidCredentials": "Correo o contraseña incorrectos.",
+    "emailNotConfirmed": "Primero confirma tu correo: revisa tu bandeja de entrada.",
+    "tooManyAttempts": "Demasiados intentos. Espera unos minutos y vuelve a intentarlo.",
+    "weakPassword": "Esa contraseña es demasiado débil. Usa al menos 8 caracteres con letras, números y símbolos.",
+    "captchaFailed": "Completa la verificación de seguridad e inténtalo de nuevo.",
+    "generic": "Algo salió mal. Inténtalo de nuevo.",
+    "googleFailed": "El inicio de sesión con Google no está disponible ahora. Inténtalo de nuevo o usa tu correo."
   }
 }

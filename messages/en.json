@@ -14,10 +14,12 @@
     "noAccount": "Don't have an account?",
     "createAccount": "Create account",
     "linkExpired": "That link has expired. For a password reset, use “Forgot password?” to request a new one; if you were confirming your email, sign up again.",
-    "linkInvalid": "That link couldn’t be used to sign you in. If you were confirming your email, it may already be verified — just sign in below. For a password reset, request a new link and open it in the same browser you requested it from."
+    "linkInvalid": "That link couldn’t be used to sign you in. If you were confirming your email, it may already be verified — just sign in below. For a password reset, request a new link and open it in the same browser you requested it from.",
+    "continueWithGoogle": "Continue with Google",
+    "orEmail": "or sign in with email"
   },
   "Sidebar": {
-    "title": "CRM Template for WhatsApp",
+    "title": "WaFlow",
     "primaryNav": "Primary",
     "dashboard": "Dashboard",
     "inbox": "Inbox",
@@ -1667,7 +1669,7 @@
       "done": "Done",
       "dialogTitle": "Invite a teammate",
       "networkError": "Could not reach the server. Try again?",
-      "fallbackAccountName": "our wacrm account",
+      "fallbackAccountName": "our WaFlow account",
       "dialogDesc": "Generate a one-time invite link. Share it via WhatsApp, Slack, or any channel you like — no email service required.",
       "roleLabel": "Role",
       "validForLabel": "Link valid for",
@@ -1684,7 +1686,7 @@
       "labelTooLong": "Label must be {max} characters or fewer",
       "copied": "Invite link copied",
       "clipboardBlocked": "Clipboard blocked — copy the link manually",
-      "whatsappMessage": "Join {accountName} on wacrm using this link (valid for {expiresInDays} days): {url}",
+      "whatsappMessage": "Join {accountName} on WaFlow using this link (valid for {expiresInDays} days): {url}",
       "createFailed": "Failed to create invitation"
     },
     "tagsAndFields": {
@@ -1804,8 +1806,8 @@
       "saveResubmit": "Save & Resubmit",
       "submitApproval": "Submit for Approval",
       "deleteDialogTitle": "Delete template?",
-      "deleteMetaDesc": "\"{name}\" will be deleted from Meta and from wacrm. Active broadcasts using this template will start failing on their next send. This can't be undone.",
-      "deleteLocalDesc": "\"{name}\" will be deleted from wacrm. It was never submitted to Meta, so no remote cleanup is needed.",
+      "deleteMetaDesc": "\"{name}\" will be deleted from Meta and from WaFlow. Active broadcasts using this template will start failing on their next send. This can't be undone.",
+      "deleteLocalDesc": "\"{name}\" will be deleted from WaFlow. It was never submitted to Meta, so no remote cleanup is needed.",
       "deleting": "Deleting…",
       "delete": "Delete",
       "toastLoadFailed": "Failed to load templates",
@@ -1857,7 +1859,7 @@
       "notConnected": "Not Connected",
       "connectedDesc": "Your access token authenticates with Meta. See Registration status below for whether webhooks are actually wired.",
       "notConnectedDesc": "Configure your Meta API credentials below to connect your WhatsApp Business account.",
-      "registered": "Registered — Meta will deliver events to wacrm",
+      "registered": "Registered — Meta will deliver events to WaFlow",
       "notRegistered": "Not registered — Meta will not deliver events",
       "verifyWithMeta": "Verify with Meta",
       "subscribedSince": "Subscribed since {date}. Click Verify with Meta if events stop arriving.",
@@ -1882,7 +1884,7 @@
       "twoStepPin": "Two-step verification PIN",
       "optional": "(optional)",
       "pinPlaceholder": "6-digit PIN from Meta WhatsApp Manager",
-      "pinHint": "Needed only to wire inbound messages for a production number. Set it in Meta Business Manager → WhatsApp Accounts → Phone Numbers → Two-step verification, then paste it here so wacrm can subscribe the number — otherwise Meta routes inbound events to whichever app last claimed it (the symptom that hits second numbers under a shared WABA). Meta test numbers have no PIN and are pre-registered — leave this blank for them. Leaving it blank also keeps an existing registration untouched.",
+      "pinHint": "Needed only to wire inbound messages for a production number. Set it in Meta Business Manager → WhatsApp Accounts → Phone Numbers → Two-step verification, then paste it here so WaFlow can subscribe the number — otherwise Meta routes inbound events to whichever app last claimed it (the symptom that hits second numbers under a shared WABA). Meta test numbers have no PIN and are pre-registered — leave this blank for them. Leaving it blank also keeps an existing registration untouched.",
       "webhookTitle": "Webhook Configuration",
       "webhookDesc": "Use this URL as your webhook callback in the Meta App Dashboard.",
       "webhookUrl": "Webhook Callback URL",
@@ -2130,7 +2132,7 @@
     },
     "aiConfig": {
       "title": "Agent setup",
-      "description": "Bring your own OpenAI, Anthropic, or OpenAI-compatible API key. wacrm calls the provider directly with your key — no per-seat AI fees, and your data stays yours. This powers AI-drafted replies in the inbox, the auto-reply bot, and the Playground.",
+      "description": "Bring your own OpenAI, Anthropic, or OpenAI-compatible API key. WaFlow calls the provider directly with your key — no per-seat AI fees, and your data stays yours. This powers AI-drafted replies in the inbox, the auto-reply bot, and the Playground.",
       "adminOnlyConfig": "Only admins and owners can change the AI configuration.",
       "loadFailed": "Failed to load AI configuration",
       "providerAndKey": "Provider & key",
@@ -2226,30 +2228,37 @@
   },
   "SignupPage": {
     "passwordsMismatch": "Passwords do not match",
-    "passwordTooShort": "Password must be at least 6 characters",
+    "passwordTooShort": "Password must be at least 8 characters",
     "checkEmailTitle": "Check your email",
     "checkEmailDesc": "We've sent a confirmation link to <strong>{email}</strong>. Please check your inbox and click the link to verify your account.",
     "backToSignIn": "Back to sign in",
     "titleJoin": "Create account & join",
     "title": "Create account",
     "descJoin": "Verify your email, then accept the invitation to join your team.",
-    "desc": "Get started with CRM Template for WhatsApp",
+    "desc": "Get started with WaFlow",
     "fullNameLabel": "Full name",
     "fullNamePlaceholder": "John Doe",
     "emailLabel": "Email",
     "emailPlaceholder": "you@example.com",
     "passwordLabel": "Password",
-    "passwordPlaceholder": "At least 6 characters",
+    "passwordPlaceholder": "At least 8 characters",
     "confirmPasswordLabel": "Confirm password",
     "confirmPasswordPlaceholder": "Repeat your password",
     "creating": "Creating account...",
     "submit": "Create account",
     "haveAccount": "Already have an account?",
-    "signIn": "Sign in"
+    "signIn": "Sign in",
+    "signUpWithGoogle": "Sign up with Google",
+    "orEmail": "or sign up with email",
+    "strengthWeak": "Weak",
+    "strengthFair": "Fair",
+    "strengthGood": "Good",
+    "strengthStrong": "Strong",
+    "terms": "By creating an account you agree to the Terms and Privacy Policy."
   },
   "ForgotPasswordPage": {
     "checkEmailTitle": "Check your email",
-    "checkEmailDesc": "We've sent a password reset link to <strong>{email}</strong>. Please check your inbox.",
+    "checkEmailDesc": "If an account exists for <strong>{email}</strong>, we've sent a password reset link. Please check your inbox.",
     "backToSignIn": "Back to sign in",
     "title": "Reset password",
     "desc": "Enter your email and we'll send you a reset link",
@@ -2262,13 +2271,13 @@
     "title": "Choose a new password",
     "desc": "Enter a new password for your account.",
     "passwordLabel": "New password",
-    "passwordPlaceholder": "At least 6 characters",
+    "passwordPlaceholder": "At least 8 characters",
     "confirmPasswordLabel": "Confirm new password",
     "confirmPasswordPlaceholder": "Repeat your new password",
     "submit": "Update password",
     "saving": "Updating...",
     "passwordsMismatch": "Passwords do not match",
-    "passwordTooShort": "Password must be at least 6 characters",
+    "passwordTooShort": "Password must be at least 8 characters",
     "checking": "Checking your link...",
     "expiredTitle": "This link is no longer valid",
     "expiredDesc": "Password reset links work once and expire after a short while. Request a new one and open it in the same browser you requested it from.",
@@ -2405,7 +2414,7 @@
     }
   },
   "Metadata": {
-    "description": "Self-hostable CRM template for WhatsApp."
+    "description": "WaFlow — the WhatsApp CRM for sales and support teams."
   },
   "Currency": {
     "USD": "US Dollar",
@@ -2825,8 +2834,10 @@
         "saveDocFailed": "Failed to save document",
         "savedIndexFailed": "Saved, but semantic indexing failed ({message}). Lexical search still works; use Reindex to retry.",
         "savedNotIndexed": "Saved, but indexing failed ({message}). The document is not searchable yet; use Reindex to retry.",
-        "savedKeywordOnly": "Saved with keyword search only — your embeddings key could not be decrypted (check ENCRYPTION_KEY, then re-enter the key)."
-      }
+        "savedKeywordOnly": "Saved with keyword search only — your embeddings key could not be decrypted (check ENCRYPTION_KEY, then re-enter the key).",
+        "docTooLarge": "Documents are limited to {max} characters. Split larger documents."
+      },
+      "messageTooLong": "Each message can be at most {max} characters."
     },
     "automations": {
       "copyName": "{name} (Copy)",
@@ -2857,7 +2868,9 @@
       "recipientsRequired": "Provide either `recipients` (preferred) or `phone_numbers` — must be a non-empty array",
       "templateNameRequired": "template_name is required",
       "templateMalformed": "Template row is malformed locally — run \"Sync from Meta\" in Settings to repair it before broadcasting.",
-      "invalidPhoneFormat": "Invalid phone number format"
+      "invalidPhoneFormat": "Invalid phone number format",
+      "tooManyRecipients": "A broadcast can have at most {max} recipients per request. Split larger sends.",
+      "invalidRecipients": "Each recipient needs a phone number and a list of text parameters."
     },
     "whatsappConfig": {
       "fetchFailed": "Failed to fetch configuration",
@@ -2868,7 +2881,7 @@
       "wabaIdDigits": "WhatsApp Business Account ID must contain only digits — copy it from Meta → WhatsApp → API Setup.",
       "pinDigits": "PIN must be exactly 6 digits.",
       "validateFailed": "Failed to validate configuration",
-      "numberLinkedElsewhere": "This WhatsApp phone number is already linked to another account on this instance. Each phone number can only be connected to one wacrm user.",
+      "numberLinkedElsewhere": "This WhatsApp phone number is already linked to another account on this instance. Each phone number can only be connected to one WaFlow user.",
       "encryptFailed": "Failed to encrypt token. Check that ENCRYPTION_KEY is a valid 64-character hex string in your environment variables.",
       "updateFailed": "Failed to update configuration",
       "saveFailed": "Failed to save configuration",
@@ -2923,5 +2936,14 @@
       "metaApiStatus": "Meta API error: {status}",
       "syncFailed": "Failed to sync templates"
     }
+  },
+  "AuthErrors": {
+    "invalidCredentials": "Invalid email or password.",
+    "emailNotConfirmed": "Please confirm your email first — check your inbox for the link.",
+    "tooManyAttempts": "Too many attempts. Please wait a few minutes and try again.",
+    "weakPassword": "That password is too weak. Use at least 8 characters with a mix of letters, numbers and symbols.",
+    "captchaFailed": "Please complete the security check and try again.",
+    "generic": "Something went wrong. Please try again.",
+    "googleFailed": "Google sign-in is unavailable right now. Please try again or use email."
   }
 }

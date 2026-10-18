@@ -6,19 +6,76 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 /**
  * Baseline security headers applied to every response.
  *
- * CSP ships as `Content-Security-Policy-Report-Only` so the browser
- * surfaces violations in the console without blocking anything — once
- * we have confidence nothing legit trips it (two deploys, a pass on
- * every route), flip the key to `Content-Security-Policy` to enforce.
+ * The Content-Security-Policy is ENFORCED (it used to ship as
+ * Report-Only). It is built from the environment so it allows exactly
+ * the origins this deployment uses and nothing more:
+ *   - your Supabase project (NEXT_PUBLIC_SUPABASE_URL) for REST,
+ *     realtime websockets, storage images and media;
+ *   - Cloudflare Turnstile only when NEXT_PUBLIC_TURNSTILE_SITE_KEY
+ *     is set (the optional CAPTCHA on the auth forms).
+ * 'unsafe-eval' is added in development only (React dev tooling and
+ * HMR need it); production builds don't.
  *
- * The rest of the headers are straight blocks, safe to enforce today:
+ * The rest of the headers are straight blocks:
  *   - HSTS: only meaningful on HTTPS (no-op on http://localhost).
  *   - X-Content-Type-Options / X-Frame-Options / Referrer-Policy:
  *     baseline OWASP hardening, no behavioural cost.
- *   - Permissions-Policy: we don't use camera / microphone / etc, so
+ *   - Cross-Origin-Opener-Policy: isolates our window from pages it
+ *     opens or that open it (Google sign-in is a full redirect, so
+ *     no popup relationship is needed).
+ *   - Permissions-Policy: we don't use camera / geolocation / etc, so
  *     deny them. A supply-chain compromise or a forgotten plugin
  *     can't silently opt back in.
  */
+const IS_DEV = process.env.NODE_ENV !== "production";
+
+function originOf(url: string | undefined): string | null {
+  if (!url) return null;
+  try {
+    return new URL(url).origin;
+  } catch {
+    return null;
+  }
+}
+
+const SUPABASE_ORIGIN = originOf(process.env.NEXT_PUBLIC_SUPABASE_URL);
+const SUPABASE_WS = SUPABASE_ORIGIN?.replace(/^http/, "ws") ?? null;
+const TURNSTILE = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
+  ? "https://challenges.cloudflare.com"
+  : null;
+
+const sources = (...list: (string | null | false)[]) =>
+  list.filter(Boolean).join(" ");
+
+const CONTENT_SECURITY_POLICY = [
+  "default-src 'self'",
+  // Next.js needs 'unsafe-inline' for its inline hydration script.
+  // Nonce-based CSP is a later project.
+  `script-src ${sources("'self'", "'unsafe-inline'", IS_DEV && "'unsafe-eval'", TURNSTILE)}`,
+  // Tailwind + inline style attributes on lots of components.
+  "style-src 'self' 'unsafe-inline'",
+  // Supabase public-bucket avatars, contact avatars (arbitrary https
+  // URLs paste-able from the UI), data URLs for tiny inline assets.
+  "img-src 'self' data: blob: https:",
+  `media-src ${sources("'self'", "blob:", "https://*.supabase.co", SUPABASE_ORIGIN)}`,
+  "font-src 'self' data:",
+  // Supabase REST + realtime (WSS). All Meta / AI provider calls
+  // happen server-side, so they don't belong here.
+  `connect-src ${sources(
+    "'self'",
+    "https://*.supabase.co",
+    "wss://*.supabase.co",
+    SUPABASE_ORIGIN,
+    SUPABASE_WS,
+    IS_DEV && "ws:",
+  )}`,
+  `frame-src ${sources(TURNSTILE) || "'none'"}`,
+  "object-src 'none'",
+  "frame-ancestors 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+].join("; ");
+
 const SECURITY_HEADERS = [
   {
     key: "Strict-Transport-Security",
@@ -27,6 +84,7 @@ const SECURITY_HEADERS = [
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "DENY" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
   {
     // Microphone is allowed for same-origin (`self`) so the inbox
     // composer can record voice notes via MediaRecorder. Everything
@@ -35,32 +93,7 @@ const SECURITY_HEADERS = [
     key: "Permissions-Policy",
     value: "camera=(), microphone=(self), geolocation=(), payment=(), usb=()",
   },
-  {
-    key: "Content-Security-Policy-Report-Only",
-    value: [
-      "default-src 'self'",
-      // Next.js needs 'unsafe-inline' for its inline hydration script
-      // and 'unsafe-eval' in dev + some production optimisations.
-      // Nonce-based CSP is a later project.
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-      // Tailwind + inline style attributes on lots of components.
-      "style-src 'self' 'unsafe-inline'",
-      // Supabase public-bucket avatars, contact avatars (arbitrary
-      // https URLs paste-able from the UI), OG images, data URLs for
-      // tiny inline assets.
-      "img-src 'self' data: blob: https:",
-      // Outbound media previews (blob: from MediaRecorder + file picker)
-      // and Supabase public-bucket audio/video the inbox renders.
-      "media-src 'self' blob: https://*.supabase.co",
-      "font-src 'self' data:",
-      // Supabase REST + realtime (WSS). All Meta API calls happen
-      // server-side, so graph.facebook.com does not belong here.
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
-      "frame-ancestors 'none'",
-      "base-uri 'self'",
-      "form-action 'self'",
-    ].join("; "),
-  },
+  { key: "Content-Security-Policy", value: CONTENT_SECURITY_POLICY },
 ] as const;
 
 const APP_LOCALE = ["en", "pt", "es", "ko"].includes(process.env.NEXT_PUBLIC_APP_LOCALE ?? "")
@@ -77,6 +110,8 @@ const nextConfig: NextConfig = {
   // Docker image can run without node_modules or the Next CLI.
   // Harmless outside Docker: `next start` keeps working as before.
   output: "standalone",
+  // Don't advertise the framework in an `X-Powered-By` response header.
+  poweredByHeader: false,
   experimental: {
     turbopackPluginRuntimeStrategy: "workerThreads",
   },
